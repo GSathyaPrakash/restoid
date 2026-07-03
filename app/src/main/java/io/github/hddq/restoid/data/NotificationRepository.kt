@@ -116,6 +116,9 @@ class NotificationRepository(private val context: Context) {
             progressStyle.setProgressSegments(segments)
             progressStyle.setProgressPoints(points)
         }
+        
+        // Ensure the ProgressStyle itself knows the current progress
+        progressStyle.setProgress(overallPercent)
 
         return NotificationCompat.Builder(context, PROGRESS_CHANNEL_ID)
             .setContentTitle(title)

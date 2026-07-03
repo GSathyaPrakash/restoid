@@ -85,6 +85,31 @@ class PreferencesRepository(context: Context) {
         }
     }
 
+    // Custom Directories Backup Preferences
+    fun saveCustomDirectoriesBackupEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean("runtasks_custom_directories_enabled", enabled).apply()
+    }
+
+    fun loadCustomDirectoriesBackupEnabled(): Boolean {
+        return prefs.getBoolean("runtasks_custom_directories_enabled", false)
+    }
+
+    fun saveCustomDirectories(allUris: Set<String>, selectedUris: Set<String>) {
+        with(prefs.edit()) {
+            putStringSet("runtasks_custom_directories_all", allUris)
+            putStringSet("runtasks_custom_directories_selected", selectedUris)
+            apply()
+        }
+    }
+
+    fun loadCustomDirectoriesAll(): Set<String> {
+        return prefs.getStringSet("runtasks_custom_directories_all", emptySet()) ?: emptySet()
+    }
+
+    fun loadCustomDirectoriesSelected(): Set<String> {
+        return prefs.getStringSet("runtasks_custom_directories_selected", emptySet()) ?: emptySet()
+    }
+
     // Backup Preferences
     fun saveBackupTypes(types: BackupTypes) {
         with(prefs.edit()) {

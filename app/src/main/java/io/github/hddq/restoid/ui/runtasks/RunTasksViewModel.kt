@@ -70,7 +70,14 @@ class RunTasksViewModel(
         RunTasksUiState(
             backupEnabled = preferencesRepository.loadRunTasksBackupEnabled(),
             backupTypes = preferencesRepository.loadBackupTypes(),
-            maintenance = preferencesRepository.loadMaintenanceState()
+            maintenance = preferencesRepository.loadMaintenanceState(),
+            customDirectoriesBackupEnabled = preferencesRepository.loadCustomDirectoriesBackupEnabled(),
+            customDirectories = preferencesRepository.loadCustomDirectoriesAll().map { uri ->
+                CustomDirectory(
+                    uri = uri,
+                    isSelected = preferencesRepository.loadCustomDirectoriesSelected().contains(uri)
+                )
+            }
         )
     )
     val uiState = _uiState.asStateFlow()
@@ -143,6 +150,11 @@ class RunTasksViewModel(
         val allAppsSelected = _uiState.value.apps.isNotEmpty() && _uiState.value.apps.all { it.isSelected }
         val selectedPackages = _uiState.value.apps.filter { it.isSelected }.map { it.packageName }.toSet()
         preferencesRepository.saveRunTasksSelectedApps(allAppsSelected, selectedPackages)
+
+        preferencesRepository.saveCustomDirectoriesBackupEnabled(_uiState.value.customDirectoriesBackupEnabled)
+        val allCustomDirs = _uiState.value.customDirectories.map { it.uri }.toSet()
+        val selectedCustomDirs = _uiState.value.customDirectories.filter { it.isSelected }.map { it.uri }.toSet()
+        preferencesRepository.saveCustomDirectories(allCustomDirs, selectedCustomDirs)
 
         val errorState = preflightChecks()
         if (errorState != null) {

@@ -20,6 +20,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -431,33 +432,51 @@ private fun SnapshotItem(snapshotWithMetadata: SnapshotWithMetadata, apps: List<
         }
 
         val appCount = snapshotWithMetadata.metadata?.apps?.size ?: 0
-        if (appCount > 0) {
+        val customDirCount = snapshotWithMetadata.metadata?.customDirectories?.size ?: 0
+        val totalCount = appCount + customDirCount
+        
+        if (totalCount > 0) {
             Text(
-                pluralStringResource(R.plurals.apps_count, appCount, appCount),
+                pluralStringResource(R.plurals.backed_up_items_count, totalCount, totalCount),
                 style = MaterialTheme.typography.labelMedium
             )
-            if (apps != null && apps.isNotEmpty()) {
-                BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-                    val iconSize = 32.dp
-                    val spacing = 8.dp
-                    val itemWidthWithSpacing = iconSize + spacing
-                    val maxIconsPossible = ((maxWidth + spacing) / itemWidthWithSpacing).toInt().coerceAtLeast(1)
-                    val showCounter = appCount > maxIconsPossible
-                    val limit = if (showCounter) maxIconsPossible - 1 else maxIconsPossible
+            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                val iconSize = 32.dp
+                val spacing = 8.dp
+                val itemWidthWithSpacing = iconSize + spacing
+                val maxIconsPossible = ((maxWidth + spacing) / itemWidthWithSpacing).toInt().coerceAtLeast(1)
+                
+                val customDirSlot = if (customDirCount > 0) 1 else 0
+                val availableSlotsForApps = (maxIconsPossible - customDirSlot).coerceAtLeast(0)
+                val showCounter = appCount > availableSlotsForApps
+                val limit = if (showCounter) (availableSlotsForApps - 1).coerceAtLeast(0) else availableSlotsForApps
 
-                    Row(horizontalArrangement = Arrangement.spacedBy(spacing), verticalAlignment = Alignment.CenterVertically) {
+                Row(horizontalArrangement = Arrangement.spacedBy(spacing), verticalAlignment = Alignment.CenterVertically) {
+                    if (apps != null && apps.isNotEmpty() && appCount > 0) {
                         apps.take(limit).forEach { app ->
                             Image(painter = rememberAsyncImagePainter(model = app.icon), contentDescription = app.name, modifier = Modifier.size(iconSize))
                         }
-                        val moreCount = appCount - apps.size.coerceAtMost(limit) // Fix logic to use limit correctly
-                        if (moreCount > 0) { // Only show if we actually hid something
-                            // Recalculate based on total apps
-                            val realMoreCount = appCount - limit
-                            if(realMoreCount > 0) {
-                                Box(contentAlignment = Alignment.Center, modifier = Modifier.size(iconSize).clip(CircleShape).background(MaterialTheme.colorScheme.secondaryContainer)) {
-                                    Text(text = "+$realMoreCount", style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp), color = MaterialTheme.colorScheme.onSecondaryContainer, fontWeight = FontWeight.Bold)
-                                }
+                        val realMoreCount = appCount - limit
+                        if(realMoreCount > 0) {
+                            Box(contentAlignment = Alignment.Center, modifier = Modifier.size(iconSize).clip(CircleShape).background(MaterialTheme.colorScheme.secondaryContainer)) {
+                                Text(text = "+$realMoreCount", style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp), color = MaterialTheme.colorScheme.onSecondaryContainer, fontWeight = FontWeight.Bold)
                             }
+                        }
+                    }
+                    if (customDirCount > 0) {
+                        Box(contentAlignment = Alignment.Center, modifier = Modifier.size(iconSize)) {
+                            Icon(
+                                imageVector = Icons.Default.Folder,
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxSize(),
+                                tint = MaterialTheme.colorScheme.secondaryContainer
+                            )
+                            Text(
+                                text = customDirCount.toString(),
+                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 12.sp),
+                                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                fontWeight = FontWeight.Bold
+                            )
                         }
                     }
                 }

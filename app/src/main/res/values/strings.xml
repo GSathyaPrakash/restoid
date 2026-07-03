@@ -110,6 +110,14 @@
         <item quantity="one">App (%1$d):</item>
         <item quantity="other">Apps (%1$d):</item>
     </plurals>
+    <plurals name="backed_up_items_count">
+        <item quantity="one">Backed up (%1$d):</item>
+        <item quantity="other">Backed up (%1$d):</item>
+    </plurals>
+    <plurals name="custom_directories_count">
+        <item quantity="one">Custom Directory (%1$d):</item>
+        <item quantity="other">Custom Directories (%1$d):</item>
+    </plurals>
     <string name="no_app_info_for_snapshot">No app information available for this snapshot.</string>
     <string name="metadata_missing_or_corrupted">Metadata is missing or corrupted.</string>
     <string name="metadata_restore_success">Metadata restored successfully.</string>
@@ -147,6 +155,10 @@
     <plurals name="snapshot_backed_up_apps_count">
         <item quantity="one">Backed up App (%1$d)</item>
         <item quantity="other">Backed up Apps (%1$d)</item>
+    </plurals>
+    <plurals name="snapshot_backed_up_custom_directories_count">
+        <item quantity="one">Backed up Custom Directory (%1$d)</item>
+        <item quantity="other">Backed up Custom Directories (%1$d)</item>
     </plurals>
     <string name="snapshot_not_found">No snapshot found.</string>
     <string name="snapshot_forgetting">Forgetting snapshot…</string>

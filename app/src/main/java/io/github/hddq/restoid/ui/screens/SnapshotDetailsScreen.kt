@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -108,6 +109,7 @@ fun SnapshotDetailsScreen(
                     item {
                         SnapshotDetailsHeader(snapshot = snapshot!!)
                     }
+                    val customDirs = metadata?.customDirectories ?: emptyMap()
                     if (backupDetails.isNotEmpty()) {
                         item {
                             Text(
@@ -135,7 +137,38 @@ fun SnapshotDetailsScreen(
                                 }
                             }
                         }
-                    } else if (!isLoading) {
+                    }
+                    if (customDirs.isNotEmpty()) {
+                        item {
+                            Text(
+                                pluralStringResource(
+                                    R.plurals.snapshot_backed_up_custom_directories_count,
+                                    customDirs.size,
+                                    customDirs.size
+                                ),
+                                style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(top = if (backupDetails.isNotEmpty()) 16.dp else 0.dp, bottom = 8.dp)
+                            )
+                            Card(
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                                )
+                            ) {
+                                Column {
+                                    val dirsList = customDirs.toList()
+                                    dirsList.forEachIndexed { index, (path, dirMetadata) ->
+                                        BackedUpCustomDirItem(path = path, metadata = dirMetadata)
+                                        if (index < dirsList.size - 1) {
+                                            HorizontalDivider(color = MaterialTheme.colorScheme.background)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    if (backupDetails.isEmpty() && customDirs.isEmpty() && !isLoading) {
                         item {
                             if (metadata == null) {
                                 Text(
@@ -236,4 +269,27 @@ fun ConfirmForgetDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
             }
         }
     )
+}
+
+@Composable
+fun BackedUpCustomDirItem(path: String, metadata: io.github.hddq.restoid.model.CustomDirectoryMetadata) {
+    val context = LocalContext.current
+    Row(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            Icons.Default.Folder,
+            contentDescription = null,
+            modifier = Modifier.size(40.dp),
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Spacer(Modifier.width(16.dp))
+        Column {
+            Text(path.substringAfterLast("/").ifEmpty { path }, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+            val sizeInfo = metadata.size?.let { Formatter.formatShortFileSize(context, it) } ?: stringResource(R.string.not_available)
+            Text(
+                stringResource(R.string.progress_size) + ": " + sizeInfo + " • " + path,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
 }

@@ -98,6 +98,9 @@ class NotificationRepository(private val context: Context) {
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setProgress(100, percentage, false)
+            .addExtras(android.os.Bundle().apply {
+                putBoolean(Notification.EXTRA_REQUEST_PROMOTED_ONGOING, true)
+            })
             .setContentIntent(createPendingIntent())
             .build()
     }

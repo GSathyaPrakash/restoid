@@ -129,7 +129,7 @@ class BackupOperationRunner(
             pathsToBackup.add(0, restoidMetadataFile.absolutePath)
 
             if (pathsToBackup.size <= 1 && metadata.apps.values.none { "permissions" in it.types } && metadata.customDirectories.isEmpty()) {
-                throw IllegalStateException(context.getString(R.string.backup_error_no_files_selected))
+                throw IllegalStateException(context.getString(R.string.backup_error_no_files_selected_for_items))
             }
 
             currentStage = 2
@@ -233,7 +233,7 @@ class BackupOperationRunner(
             isSuccess = true
             summary = finalSummaryProgress?.finalSummary
                 ?: context.resources.getQuantityString(
-                    R.plurals.backup_summary_success,
+                    R.plurals.backup_summary_success_items,
                     selectedApps.size,
                     selectedApps.size
                 )
@@ -385,8 +385,8 @@ class BackupOperationRunner(
         if (selectedApps.isEmpty() && request.customDirectories.isEmpty()) {
             return OperationProgress(
                 isFinished = true,
-                error = context.getString(R.string.error_no_apps_selected),
-                finalSummary = context.getString(R.string.summary_no_apps_selected)
+                error = context.getString(R.string.error_no_items_selected),
+                finalSummary = context.getString(R.string.summary_no_items_selected)
             )
         }
 

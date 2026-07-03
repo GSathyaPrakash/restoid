@@ -232,8 +232,8 @@ class RunTasksViewModel(
             if (state.apps.none { it.isSelected } && !hasCustomDirs) {
                 return OperationProgress(
                     isFinished = true,
-                    error = application.getString(R.string.error_no_apps_selected),
-                    finalSummary = application.getString(R.string.summary_no_apps_selected)
+                    error = application.getString(R.string.error_no_items_selected),
+                    finalSummary = application.getString(R.string.summary_no_items_selected)
                 )
             }
             val hasSelectedBackupType = state.apps

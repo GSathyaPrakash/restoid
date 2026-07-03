@@ -310,17 +310,17 @@
     <string name="backup_stage_preparing">[%1$d/%2$d] Preparing backup...</string>
     <string name="backup_stage_running">[%1$d/%2$d] Backing up apps…</string>
     <string name="backup_stage_finalizing">[%1$d/%2$d] Finalizing backup…</string>
-    <string name="backup_error_no_files_selected">No files found to back up for the selected apps.</string>
+    <string name="backup_error_no_files_selected_for_items">No files found to back up for the selected items.</string>
     <string name="backup_error_command_failed_with_code">Restic command failed with exit code %1$d.</string>
     <string name="backup_warning_metadata_not_saved">Warning: Could not save backup metadata file locally.</string>
-    <plurals name="backup_summary_success">
-        <item quantity="one">Backed up %1$d app.</item>
-        <item quantity="other">Backed up %1$d apps.</item>
+    <plurals name="backup_summary_success_items">
+        <item quantity="one">Backed up %1$d item.</item>
+        <item quantity="other">Backed up %1$d items.</item>
     </plurals>
 
     <string name="error_fatal_with_message">A fatal error occurred: %1$s</string>
-    <string name="error_no_apps_selected">No apps selected.</string>
-    <string name="summary_no_apps_selected">No apps were selected.</string>
+    <string name="error_no_items_selected">No items selected.</string>
+    <string name="summary_no_items_selected">No items were selected.</string>
     <string name="error_no_backup_types_selected">No backup types selected.</string>
     <string name="summary_no_backup_types_selected">No backup types were selected.</string>
     <string name="error_restic_not_installed">Restic is not installed.</string>
@@ -347,9 +347,10 @@
     <string name="restore_error_no_items_selected">No items selected for restore.</string>
     <string name="restore_error_no_restore_types_selected">No restore types selected.</string>
     <string name="restore_error_password_not_found">Password not found for repository.</string>
-    <string name="restore_error_no_files_found">No files found in the snapshot for the selected apps.</string>
+    <string name="restore_error_no_files_found">No files found in the snapshot for the selected items.</string>
     <string name="restore_error_command_failed">Restic restore command failed.</string>
-    <string name="restore_stage_processing_template">[%1$d/%2$d] Processing Apps</string>
+    <string name="restore_stage_processing_template_apps">[%1$d/%2$d] Processing Apps</string>
+    <string name="restore_stage_processing_template_custom_directories">[%1$d/%2$d] Processing Custom Directories</string>
     <string name="restore_failure_install_commit">%1$s: Install commit failed: %2$s</string>
     <string name="restore_failure_write_apk_splits">%1$s: Failed to write APK splits.</string>
     <string name="restore_failure_create_install_session">%1$s: Failed to create install session.</string>
@@ -360,13 +361,13 @@
     <string name="restore_stage_processing_custom_directories">Processing Custom Directories…</string>
     <string name="restore_failure_custom_directory">Failed to restore custom directory %1$s</string>
     <string name="restore_summary_finished_in">Restore finished in %1$s. </string>
-    <plurals name="restore_summary_processed">
-        <item quantity="one">Successfully processed %1$d app.</item>
-        <item quantity="other">Successfully processed %1$d apps.</item>
+    <plurals name="restore_summary_processed_items">
+        <item quantity="one">Successfully processed %1$d item.</item>
+        <item quantity="other">Successfully processed %1$d items.</item>
     </plurals>
-    <plurals name="restore_summary_failed">
-        <item quantity="one"> Failed to restore %1$d app.</item>
-        <item quantity="other"> Failed to restore %1$d apps.</item>
+    <plurals name="restore_summary_failed_items">
+        <item quantity="one"> Failed to restore %1$d item.</item>
+        <item quantity="other"> Failed to restore %1$d items.</item>
     </plurals>
     <string name="restore_summary_details">\n\nDetails:\n- %1$s</string>
 

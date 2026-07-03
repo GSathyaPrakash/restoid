@@ -207,7 +207,7 @@ class RestoreOperationRunner(
             val processingAppsStageIndex = stageList.indexOf(context.getString(R.string.restore_stage_processing_apps))
             if (processingAppsStageIndex != -1) {
                 currentStageNum = processingAppsStageIndex + 1
-                val processingStageTitle = context.getString(R.string.restore_stage_processing_template, currentStageNum, totalStages)
+                val processingStageTitle = context.getString(R.string.restore_stage_processing_template_apps, currentStageNum, totalStages)
 
                 for ((index, packageName) in selectedAppPackages.withIndex()) {
                     throwIfCancelled()
@@ -321,7 +321,7 @@ class RestoreOperationRunner(
             val customDirsStageIndex = stageList.indexOf(context.getString(R.string.restore_stage_processing_custom_directories))
             if (customDirsStageIndex != -1) {
                 currentStageNum = customDirsStageIndex + 1
-                val processingStageTitle = context.getString(R.string.restore_stage_processing_template, currentStageNum, totalStages)
+                val processingStageTitle = context.getString(R.string.restore_stage_processing_template_custom_directories, currentStageNum, totalStages)
                 
                 for ((index, path) in request.selectedCustomDirectories.withIndex()) {
                     throwIfCancelled()
@@ -394,7 +394,7 @@ class RestoreOperationRunner(
                 append(context.getString(R.string.restore_summary_finished_in, formatElapsedTime(finalElapsedTime)))
                 append(
                     context.resources.getQuantityString(
-                        R.plurals.restore_summary_processed,
+                        R.plurals.restore_summary_processed_items,
                         successes,
                         successes
                     )
@@ -402,7 +402,7 @@ class RestoreOperationRunner(
                 if (failures > 0) {
                     append(
                         context.resources.getQuantityString(
-                            R.plurals.restore_summary_failed,
+                            R.plurals.restore_summary_failed_items,
                             failures,
                             failures
                         )

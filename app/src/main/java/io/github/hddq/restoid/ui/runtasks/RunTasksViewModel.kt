@@ -183,6 +183,7 @@ class RunTasksViewModel(
             backupTypes = _uiState.value.backupTypes.toSelection(),
             selectedPackageNames = _uiState.value.apps.filter { it.isSelected }.map { it.packageName },
             appBackupTypes = selectedAppBackupTypes().mapValues { it.value.toSelection() },
+            customDirectories = if (_uiState.value.customDirectoriesBackupEnabled) selectedCustomDirs.toList() else emptyList(),
             unlockRepo = maintenance.unlockRepo,
             forgetSnapshots = maintenance.forgetSnapshots,
             pruneRepo = maintenance.pruneRepo,
@@ -227,7 +228,8 @@ class RunTasksViewModel(
         }
 
         if (state.backupEnabled) {
-            if (state.apps.none { it.isSelected }) {
+            val hasCustomDirs = state.customDirectoriesBackupEnabled && state.customDirectories.any { it.isSelected }
+            if (state.apps.none { it.isSelected } && !hasCustomDirs) {
                 return OperationProgress(
                     isFinished = true,
                     error = application.getString(R.string.error_no_apps_selected),
@@ -236,7 +238,7 @@ class RunTasksViewModel(
             }
             val hasSelectedBackupType = state.apps
                 .filter { it.isSelected }
-                .any { app -> effectiveBackupTypes(state, app.packageName).anyEnabled() }
+                .any { app -> effectiveBackupTypes(state, app.packageName).anyEnabled() } || hasCustomDirs
             if (!hasSelectedBackupType) {
                 return OperationProgress(
                     isFinished = true,

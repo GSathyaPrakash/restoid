@@ -445,7 +445,8 @@ fun CustomDirectoriesConfigScreen(
                     Column {
                         uiState.customDirectories.forEachIndexed { index, customDir ->
                             val uri = android.net.Uri.parse(customDir.uri)
-                            val pathSegment = uri.lastPathSegment ?: customDir.uri
+                            val realPath = io.github.hddq.restoid.util.StorageUtils.getPathFromTreeUri(uri)
+                            val displayPath = realPath ?: (uri.lastPathSegment ?: customDir.uri)
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -454,15 +455,15 @@ fun CustomDirectoriesConfigScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Column(modifier = Modifier.weight(1f)) {
-                                    val title = pathSegment.substringAfterLast(":")
+                                    val title = displayPath.substringAfterLast("/")
                                     Text(
-                                        text = title,
+                                        text = title.ifEmpty { displayPath },
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis,
                                         style = MaterialTheme.typography.bodyLarge
                                     )
                                     Text(
-                                        text = pathSegment,
+                                        text = displayPath,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis,
                                         style = MaterialTheme.typography.bodySmall,

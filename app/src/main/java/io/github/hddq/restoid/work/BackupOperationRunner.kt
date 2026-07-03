@@ -14,6 +14,7 @@ import io.github.hddq.restoid.data.ResticState
 import io.github.hddq.restoid.model.AppInfo
 import io.github.hddq.restoid.model.AppMetadata
 import io.github.hddq.restoid.model.RestoidMetadata
+import io.github.hddq.restoid.model.CustomDirectoryMetadata
 import io.github.hddq.restoid.ui.shared.OperationProgress
 import io.github.hddq.restoid.util.ResticOutputParser
 import io.github.hddq.restoid.util.buildResticOptionFlags
@@ -119,6 +120,7 @@ class BackupOperationRunner(
                 selectedApps,
                 request.backupTypes,
                 request.appBackupTypes,
+                request.customDirectories,
                 shouldStop
             )
             restoidMetadataFile = File(context.cacheDir, "restoid.json")
@@ -126,7 +128,7 @@ class BackupOperationRunner(
             restoidMetadataFile.writeText(json.encodeToString(metadata))
             pathsToBackup.add(0, restoidMetadataFile.absolutePath)
 
-            if (pathsToBackup.size <= 1 && metadata.apps.values.none { "permissions" in it.types }) {
+            if (pathsToBackup.size <= 1 && metadata.apps.values.none { "permissions" in it.types } && metadata.customDirectories.isEmpty()) {
                 throw IllegalStateException(context.getString(R.string.backup_error_no_files_selected))
             }
 
@@ -277,6 +279,7 @@ class BackupOperationRunner(
         selectedApps: List<AppInfo>,
         backupTypes: BackupTypeSelection,
         appBackupTypes: Map<String, BackupTypeSelection>,
+        customDirectories: List<String>,
         shouldStop: () -> Boolean
     ): Triple<MutableList<String>, List<String>, RestoidMetadata> {
         fun throwIfCancelled() {
@@ -355,7 +358,23 @@ class BackupOperationRunner(
                 grantedRuntimePermissions = grantedRuntimePermissions
             )
         }
-        val metadata = RestoidMetadata(apps = appMetadataMap)
+        val customDirectoryMetadataMap = mutableMapOf<String, CustomDirectoryMetadata>()
+        customDirectories.forEach { dirUriStr ->
+            throwIfCancelled()
+            val uri = android.net.Uri.parse(dirUriStr)
+            val realPath = io.github.hddq.restoid.util.StorageUtils.getPathFromTreeUri(uri)
+            if (realPath != null) {
+                // Resolve path for shell in case it's on an external SD card
+                val shellPath = io.github.hddq.restoid.util.StorageUtils.resolvePathForShell(realPath)
+                val existing = Shell.cmd("[ -e '$shellPath' ]").exec().isSuccess
+                if (existing) {
+                    pathsToBackup.add(shellPath)
+                    val size = getDirectorySize(listOf(shellPath))
+                    customDirectoryMetadataMap[shellPath] = CustomDirectoryMetadata(size = size)
+                }
+            }
+        }
+        val metadata = RestoidMetadata(apps = appMetadataMap, customDirectories = customDirectoryMetadataMap)
         return Triple(pathsToBackup, excludePatterns, metadata)
     }
 
@@ -363,7 +382,7 @@ class BackupOperationRunner(
         request: BackupWorkRequest,
         selectedApps: List<AppInfo>
     ): OperationProgress? {
-        if (selectedApps.isEmpty()) {
+        if (selectedApps.isEmpty() && request.customDirectories.isEmpty()) {
             return OperationProgress(
                 isFinished = true,
                 error = context.getString(R.string.error_no_apps_selected),
@@ -380,7 +399,7 @@ class BackupOperationRunner(
                     backupOptions.obb ||
                     backupOptions.media ||
                     backupOptions.permissions
-        }
+        } || request.customDirectories.isNotEmpty()
         if (!hasAnyBackupType) {
             return OperationProgress(
                 isFinished = true,

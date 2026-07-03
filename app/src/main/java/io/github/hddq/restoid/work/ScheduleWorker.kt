@@ -43,6 +43,7 @@ class ScheduleWorker(
             backupTypes = schedule.config.backupTypes,
             selectedPackageNames = schedule.config.selectedPackageNames,
             appBackupTypes = schedule.config.appBackupTypes,
+            customDirectories = schedule.config.customDirectories,
             unlockRepo = schedule.config.unlockRepo,
             forgetSnapshots = schedule.config.forgetSnapshots,
             pruneRepo = schedule.config.pruneRepo,

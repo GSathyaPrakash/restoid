@@ -99,7 +99,8 @@ class RunTasksOperationRunner(
                     repositoryKey = request.repositoryKey,
                     backupTypes = request.backupTypes,
                     selectedPackageNames = request.selectedPackageNames,
-                    appBackupTypes = request.appBackupTypes
+                    appBackupTypes = request.appBackupTypes,
+                    customDirectories = request.customDirectories
                 )
 
                 val result = backupRunner.run(

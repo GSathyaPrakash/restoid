@@ -2,6 +2,11 @@ package io.github.hddq.restoid.model
 
 import kotlinx.serialization.Serializable
 
+@Serializable
+data class CustomDirectoryMetadata(
+    val size: Long
+)
+
 /**
  * Represents the top-level structure of the `restoid.json` metadata file.
  * It contains a map of applications that were included in the snapshot.
@@ -11,7 +16,8 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class RestoidMetadata(
-    val apps: Map<String, AppMetadata>
+    val apps: Map<String, AppMetadata>,
+    val customDirectories: Map<String, CustomDirectoryMetadata> = emptyMap()
 )
 
 /**

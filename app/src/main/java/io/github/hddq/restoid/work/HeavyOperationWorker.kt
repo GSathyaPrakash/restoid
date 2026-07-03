@@ -221,10 +221,6 @@ class HeavyOperationWorker(
 
     @Suppress("DEPRECATION")
     private fun foregroundServiceTypeDataSync(): Int {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
-        } else {
-            0
-        }
+        return ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
     }
 }

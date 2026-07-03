@@ -72,7 +72,9 @@ class NotificationRepository(private val context: Context) {
     }
 
     fun buildOperationProgressNotification(operationName: String, progress: OperationProgress): Notification {
-        val percentage = (progress.stagePercentage.coerceIn(0f, 1f) * 100).toInt()
+        val overallPercent = (progress.overallPercentage.coerceIn(0f, 1f) * 100).toInt()
+        val stagePercent = (progress.stagePercentage.coerceIn(0f, 1f) * 100).toInt()
+        
         val processedSize = Formatter.formatFileSize(context, progress.bytesProcessed)
         val totalSize = Formatter.formatFileSize(context, progress.totalBytes)
         val filesText = context.resources.getQuantityString(
@@ -88,7 +90,32 @@ class NotificationRepository(private val context: Context) {
             context.getString(R.string.notification_scanning_files)
         }
 
-        val title = progress.stageTitle.let { "$it ($percentage%)" }
+        val title = progress.stageTitle.let { "$it ($stagePercent%)" }
+
+        val match = Regex("^\\[(\\d+)/(\\d+)\\]").find(progress.stageTitle)
+        val currentStage = match?.groupValues?.get(1)?.toIntOrNull() ?: 1
+        val totalStages = match?.groupValues?.get(2)?.toIntOrNull() ?: 1
+
+        val progressStyle = NotificationCompat.ProgressStyle()
+        if (totalStages > 1) {
+            val segments = mutableListOf<NotificationCompat.ProgressStyle.Segment>()
+            val points = mutableListOf<NotificationCompat.ProgressStyle.Point>()
+            val weight = 100 / totalStages
+            for (i in 0 until totalStages) {
+                val segmentColor = if (i < currentStage - 1) android.graphics.Color.DKGRAY
+                else if (i == currentStage - 1) android.graphics.Color.BLUE
+                else android.graphics.Color.LTGRAY
+                segments.add(NotificationCompat.ProgressStyle.Segment(weight).setColor(segmentColor))
+                
+                if (i < totalStages - 1) {
+                    val pointPos = weight * (i + 1)
+                    val pointColor = if (i < currentStage - 1) android.graphics.Color.GREEN else android.graphics.Color.GRAY
+                    points.add(NotificationCompat.ProgressStyle.Point(pointPos).setColor(pointColor))
+                }
+            }
+            progressStyle.setProgressSegments(segments)
+            progressStyle.setProgressPoints(points)
+        }
 
         return NotificationCompat.Builder(context, PROGRESS_CHANNEL_ID)
             .setContentTitle(title)
@@ -97,7 +124,10 @@ class NotificationRepository(private val context: Context) {
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
-            .setProgress(100, percentage, false)
+            .setProgress(100, overallPercent, false)
+            .setStyle(progressStyle)
+            .setTicker("$overallPercent%")
+            .setShortCriticalText("$overallPercent%")
             .addExtras(android.os.Bundle().apply {
                 putBoolean(Notification.EXTRA_REQUEST_PROMOTED_ONGOING, true)
             })

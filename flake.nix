@@ -56,6 +56,7 @@
     in {
       devShells.${system}.default = pkgs.mkShell {
         packages = with pkgs; [
+	      android-studio
           jdk21
           gradle
           android-tools

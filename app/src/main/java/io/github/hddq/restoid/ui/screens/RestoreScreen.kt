@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -61,6 +62,7 @@ fun RestoreScreen(navController: NavController, snapshotId: String?, modifier: M
     val appRestoreTypes by viewModel.appRestoreTypes.collectAsState()
     val allowDowngrade by viewModel.allowDowngrade.collectAsState()
     val operationBlocked by viewModel.operationBlocked.collectAsState()
+    val customDirectories by viewModel.customDirectories.collectAsState()
 
     LaunchedEffect(operationBlocked) {
         if (operationBlocked) {
@@ -82,12 +84,15 @@ fun RestoreScreen(navController: NavController, snapshotId: String?, modifier: M
     RestoreSelectionContent(
         modifier = modifier,
         backupDetails = backupDetails,
+        customDirectories = customDirectories,
         isLoading = isLoading,
         restoreTypes = restoreTypes,
         appRestoreTypes = appRestoreTypes,
         allowDowngrade = allowDowngrade,
         onToggleApp = viewModel::toggleRestoreAppSelection,
         onToggleAll = viewModel::toggleAllRestoreSelection,
+        onToggleCustomDirectory = viewModel::toggleCustomDirectory,
+        onToggleAllCustomDirectories = viewModel::toggleAllCustomDirectoriesSelection,
         onSetAppRestoreTypes = viewModel::setAppRestoreTypes,
         onSetSelectedAppsRestoreTypes = viewModel::setSelectedAppsRestoreTypes,
         onToggleAllowDowngrade = viewModel::setAllowDowngrade
@@ -98,12 +103,15 @@ fun RestoreScreen(navController: NavController, snapshotId: String?, modifier: M
 fun RestoreSelectionContent(
     modifier: Modifier = Modifier,
     backupDetails: List<BackupDetail>,
+    customDirectories: Map<String, Boolean>,
     isLoading: Boolean,
     restoreTypes: RestoreTypes,
     appRestoreTypes: Map<String, RestoreTypes>,
     allowDowngrade: Boolean,
     onToggleApp: (String) -> Unit,
     onToggleAll: () -> Unit,
+    onToggleCustomDirectory: (String) -> Unit,
+    onToggleAllCustomDirectories: () -> Unit,
     onSetAppRestoreTypes: (String, RestoreTypes) -> Unit,
     onSetSelectedAppsRestoreTypes: (RestoreTypes) -> Unit,
     onToggleAllowDowngrade: (Boolean) -> Unit
@@ -194,6 +202,51 @@ fun RestoreSelectionContent(
                                     onToggle = { onToggleApp(detail.appInfo.packageName) }
                                 )
                                 if (index < backupDetails.size - 1) {
+                                    HorizontalDivider(color = MaterialTheme.colorScheme.background)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        val customDirectoriesList = customDirectories.toList()
+        if (customDirectoriesList.isNotEmpty()) {
+            item {
+                Column {
+                    Text(
+                        text = stringResource(R.string.title_custom_directories),
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer
+                        )
+                    ) {
+                        Column {
+                            val isAllCustomDirsSelected = customDirectoriesList.all { it.second }
+                            val selectedCount = customDirectoriesList.count { it.second }
+                            
+                            io.github.hddq.restoid.ui.shared.SelectAllListItem(
+                                isChecked = isAllCustomDirsSelected,
+                                subtitle = if (selectedCount > 0) "$selectedCount selected" else "None selected",
+                                onClick = null,
+                                onToggle = onToggleAllCustomDirectories
+                            )
+
+                            HorizontalDivider(color = MaterialTheme.colorScheme.background)
+
+                            customDirectoriesList.forEachIndexed { index, (path, isSelected) ->
+                                RestoreCustomDirListItem(
+                                    path = path,
+                                    isSelected = isSelected,
+                                    onToggle = { onToggleCustomDirectory(path) }
+                                )
+                                if (index < customDirectoriesList.size - 1) {
                                     HorizontalDivider(color = MaterialTheme.colorScheme.background)
                                 }
                             }
@@ -492,4 +545,56 @@ private fun selectedBulkRestoreTypes(
         .firstOrNull { it.appInfo.isSelected }
         ?.let { appRestoreTypes[it.appInfo.packageName] ?: defaultRestoreTypes }
         ?: defaultRestoreTypes
+}
+
+@Composable
+private fun RestoreCustomDirListItem(
+    path: String,
+    isSelected: Boolean,
+    onToggle: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onToggle)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            Icons.Default.Folder,
+            contentDescription = null,
+            modifier = Modifier.size(40.dp),
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Spacer(Modifier.width(16.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = path.substringAfterLast("/").ifEmpty { path },
+                style = MaterialTheme.typography.bodyLarge,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = path,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        Spacer(Modifier.width(16.dp))
+        Switch(
+            checked = isSelected,
+            onCheckedChange = { onToggle() },
+            thumbContent = if (isSelected) {
+                {
+                    Icon(
+                        imageVector = Icons.Filled.Check,
+                        contentDescription = null,
+                        modifier = Modifier.size(SwitchDefaults.IconSize),
+                    )
+                }
+            } else null
+        )
+    }
 }

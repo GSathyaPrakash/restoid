@@ -46,7 +46,8 @@ data class RestoreWorkRequest(
     val restoreTypes: RestoreTypeSelection,
     val allowDowngrade: Boolean,
     val selectedApps: List<RestoreAppSelection>,
-    val appRestoreTypes: Map<String, RestoreTypeSelection> = emptyMap()
+    val appRestoreTypes: Map<String, RestoreTypeSelection> = emptyMap(),
+    val selectedCustomDirectories: List<String> = emptyList()
 )
 
 @Serializable

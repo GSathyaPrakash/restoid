@@ -66,6 +66,7 @@ class RestoreOperationRunner(
 
         val stageList = mutableListOf(context.getString(R.string.restore_stage_restore_files))
         if (apkRestoreSelected || anyDataRestoreSelected || permissionsRestoreSelected) stageList.add(context.getString(R.string.restore_stage_processing_apps))
+        if (request.selectedCustomDirectories.isNotEmpty()) stageList.add(context.getString(R.string.restore_stage_processing_custom_directories))
         stageList.add(context.getString(R.string.restore_stage_cleanup))
         val totalStages = stageList.size
         var currentStageNum = 1
@@ -80,8 +81,8 @@ class RestoreOperationRunner(
                 throw IllegalStateException(context.getString(R.string.restore_error_preflight_failed))
             }
 
-            if (selectedAppPackages.isEmpty()) {
-                throw IllegalStateException(context.getString(R.string.restore_error_no_apps_selected))
+            if (selectedAppPackages.isEmpty() && request.selectedCustomDirectories.isEmpty()) {
+                throw IllegalStateException(context.getString(R.string.restore_error_no_items_selected))
             }
 
             val currentSnapshot = findSnapshot(request)
@@ -118,7 +119,8 @@ class RestoreOperationRunner(
 
             tempRestoreDir = File(context.cacheDir, "restic-restore-${System.currentTimeMillis()}").also { it.mkdirs() }
 
-            val pathsToRestore = generatePathsToRestore(selectedAppPackages, currentSnapshot, request.restoreTypes, request.appRestoreTypes)
+            val pathsToRestore = generatePathsToRestore(selectedAppPackages, currentSnapshot, request.restoreTypes, request.appRestoreTypes).toMutableList()
+            pathsToRestore.addAll(request.selectedCustomDirectories)
             val metadata = selectedRepository.id?.let { repoId ->
                 metadataRepository.getMetadataForSnapshot(repoId, currentSnapshot.id)
             }
@@ -219,7 +221,7 @@ class RestoreOperationRunner(
                         overallPercentage = (processingAppsStageIndex + processProgress) / totalStages.toFloat(),
                         currentFile = appName,
                         filesProcessed = index + 1,
-                        totalFiles = selectedAppPackages.size,
+                        totalFiles = selectedAppPackages.size + request.selectedCustomDirectories.size,
                         isFinished = false,
                         elapsedTime = (System.currentTimeMillis() - startTime) / 1000
                     )
@@ -314,6 +316,61 @@ class RestoreOperationRunner(
                 }
             } else {
                 successes = selectedAppPackages.size
+            }
+
+            val customDirsStageIndex = stageList.indexOf(context.getString(R.string.restore_stage_processing_custom_directories))
+            if (customDirsStageIndex != -1) {
+                currentStageNum = customDirsStageIndex + 1
+                val processingStageTitle = context.getString(R.string.restore_stage_processing_template, currentStageNum, totalStages)
+                
+                for ((index, path) in request.selectedCustomDirectories.withIndex()) {
+                    throwIfCancelled()
+                    var processSuccess = true
+                    val processProgress = (index + 1).toFloat() / request.selectedCustomDirectories.size.toFloat()
+
+                    progressState = progressState.copy(
+                        stageTitle = processingStageTitle,
+                        stagePercentage = processProgress,
+                        overallPercentage = (customDirsStageIndex + processProgress) / totalStages.toFloat(),
+                        currentFile = path.substringAfterLast("/").ifEmpty { path },
+                        filesProcessed = successes + 1,
+                        totalFiles = selectedAppPackages.size + request.selectedCustomDirectories.size,
+                        isFinished = false,
+                        elapsedTime = (System.currentTimeMillis() - startTime) / 1000
+                    )
+                    onProgress(progressState)
+                    
+                    // sourcePath is tempRestoreDir + path (since path is absolute e.g. /sdcard/X3, it will be tempRestoreDir/sdcard/X3)
+                    val sourcePath = File(tempRestoreDir, path.drop(1)).absolutePath
+                    val targetFile = File(path)
+                    val parent = targetFile.parentFile
+                    
+                    if (parent != null) {
+                        Shell.cmd("mkdir -p ${shellQuote(parent.absolutePath)}").exec()
+                    }
+                    
+                    if (Shell.cmd("[ -e ${shellQuote(sourcePath)} ]").exec().isSuccess) {
+                        Shell.cmd("rm -rf ${shellQuote(path)}").exec()
+                        val copyResult = Shell.cmd("cp -R ${shellQuote(sourcePath)} ${shellQuote(path)}").exec()
+                        if (!copyResult.isSuccess) {
+                            processSuccess = false
+                            failureDetails.add(context.getString(R.string.restore_failure_custom_directory, path))
+                        } else {
+                            if (path.startsWith("/storage/") || path.startsWith("/sdcard/")) {
+                                val ownerResult = Shell.cmd("stat -c '%u:%g' ${shellQuote(parent?.absolutePath ?: "/sdcard")}").exec()
+                                val owner = ownerResult.out.firstOrNull()?.trim()
+                                if (owner != null && owner.isNotEmpty()) {
+                                    Shell.cmd("chown -R $owner ${shellQuote(path)}").exec()
+                                }
+                            }
+                        }
+                    } else {
+                        processSuccess = false
+                        failureDetails.add(context.getString(R.string.restore_failure_custom_directory, path))
+                    }
+                    
+                    if (processSuccess) successes++ else failures++
+                }
             }
 
             currentStageNum = totalStages

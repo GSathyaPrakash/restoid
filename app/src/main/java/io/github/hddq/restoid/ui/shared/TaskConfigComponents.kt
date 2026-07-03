@@ -187,14 +187,14 @@ fun BackupTypeToggle(label: String, description: String, checked: Boolean, onChe
 fun SelectAllListItem(
     isChecked: Boolean,
     subtitle: String? = null,
-    onClick: () -> Unit,
+    onClick: (() -> Unit)? = null,
     onToggle: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Min)
-            .clickable(onClick = onClick)
+            .clickable(onClick = onClick ?: onToggle)
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -224,19 +224,21 @@ fun SelectAllListItem(
                 )
             }
         }
-        Spacer(Modifier.width(12.dp))
-        Icon(
-            imageVector = Icons.Default.ChevronRight,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(Modifier.width(12.dp))
-        Box(
-            modifier = Modifier
-                .fillMaxHeight(0.5f)
-                .width(1.dp)
-                .background(MaterialTheme.colorScheme.outlineVariant)
-        )
+        if (onClick != null) {
+            Spacer(Modifier.width(12.dp))
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.width(12.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight(0.5f)
+                    .width(1.dp)
+                    .background(MaterialTheme.colorScheme.outlineVariant)
+            )
+        }
         Spacer(Modifier.width(16.dp))
         Switch(
             checked = isChecked,

@@ -58,6 +58,7 @@ import io.github.hddq.restoid.ui.home.HomeViewModelFactory
 import io.github.hddq.restoid.ui.restore.RestoreViewModel
 import io.github.hddq.restoid.ui.restore.RestoreViewModelFactory
 import io.github.hddq.restoid.ui.runtasks.BackupConfigScreen
+import io.github.hddq.restoid.ui.runtasks.CustomDirectoriesConfigScreen
 import io.github.hddq.restoid.ui.runtasks.CheckConfigScreen
 import io.github.hddq.restoid.ui.runtasks.ForgetConfigScreen
 import io.github.hddq.restoid.ui.runtasks.RunTasksRoutes
@@ -266,6 +267,7 @@ class MainActivity : FragmentActivity() {
                                     val titleRes = when {
                                         currentDestination?.route == RunTasksRoutes.Main -> R.string.topbar_tasks
                                         currentDestination?.route == RunTasksRoutes.BackupConfig -> R.string.topbar_backup_config
+                                        currentDestination?.route == RunTasksRoutes.CustomDirectoriesConfig -> R.string.title_custom_directories
                                         currentDestination?.route == RunTasksRoutes.ForgetConfig -> R.string.topbar_forget_config
                                         currentDestination?.route == RunTasksRoutes.CheckConfig -> R.string.topbar_check_config
                                         currentDestination?.route == SchedulesRoutes.Main -> R.string.topbar_schedules
@@ -535,6 +537,7 @@ class MainActivity : FragmentActivity() {
                                         navController.navigate(Screen.OperationProgress.route) { launchSingleTop = true }
                                     },
                                     onNavigateToBackupConfig = { navController.navigate(RunTasksRoutes.BackupConfig) },
+                                    onNavigateToCustomDirectoriesConfig = { navController.navigate(RunTasksRoutes.CustomDirectoriesConfig) },
                                     onNavigateToForgetConfig = { navController.navigate(RunTasksRoutes.ForgetConfig) },
                                     onNavigateToCheckConfig = { navController.navigate(RunTasksRoutes.CheckConfig) }
                                 )
@@ -555,6 +558,23 @@ class MainActivity : FragmentActivity() {
                                     )
                                 )
                                 BackupConfigScreen(viewModel = vm)
+                            }
+                            composable(RunTasksRoutes.CustomDirectoriesConfig) { backStackEntry ->
+                                val parentEntry = remember(backStackEntry) {
+                                    navController.getBackStackEntry(Screen.RunTasks.route)
+                                }
+                                val vm: RunTasksViewModel = viewModel(
+                                    viewModelStoreOwner = parentEntry,
+                                    factory = RunTasksViewModelFactory(
+                                        app,
+                                        app.repositoriesRepository,
+                                        app.resticBinaryManager,
+                                        app.appInfoRepository,
+                                        app.preferencesRepository,
+                                        app.operationWorkRepository
+                                    )
+                                )
+                                CustomDirectoriesConfigScreen(viewModel = vm)
                             }
                             composable(RunTasksRoutes.ForgetConfig) { backStackEntry ->
                                 val parentEntry = remember(backStackEntry) {

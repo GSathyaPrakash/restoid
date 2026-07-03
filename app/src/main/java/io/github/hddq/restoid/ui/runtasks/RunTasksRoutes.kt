@@ -5,4 +5,5 @@ object RunTasksRoutes {
     const val BackupConfig = "run_tasks/backup_config"
     const val ForgetConfig = "run_tasks/forget_config"
     const val CheckConfig = "run_tasks/check_config"
+    const val CustomDirectoriesConfig = "run_tasks/custom_directories_config"
 }

@@ -12,7 +12,6 @@ import io.github.hddq.restoid.data.ResticState
 import io.github.hddq.restoid.model.AppInfo
 import io.github.hddq.restoid.ui.shared.BackupTypes
 import io.github.hddq.restoid.ui.shared.OperationProgress
-import io.github.hddq.restoid.work.BackupTypeSelection
 import io.github.hddq.restoid.work.OperationWorkRepository
 import io.github.hddq.restoid.work.RunTasksWorkRequest
 import kotlinx.coroutines.Dispatchers
@@ -36,6 +35,11 @@ data class RunTasksMaintenanceConfig(
     val keepMonthly: Int = 6
 )
 
+data class CustomDirectory(
+    val uri: String,
+    val isSelected: Boolean = true
+)
+
 data class RunTasksUiState(
     val apps: List<AppInfo> = emptyList(),
     val isLoadingApps: Boolean = true,
@@ -44,7 +48,9 @@ data class RunTasksUiState(
     val appBackupTypes: Map<String, BackupTypes> = emptyMap(),
     val maintenance: RunTasksMaintenanceConfig = RunTasksMaintenanceConfig(),
     val isRunning: Boolean = false,
-    val progress: OperationProgress = OperationProgress()
+    val progress: OperationProgress = OperationProgress(),
+    val customDirectoriesBackupEnabled: Boolean = false,
+    val customDirectories: List<CustomDirectory> = emptyList()
 )
 
 sealed interface RunTasksUiEvent {
@@ -293,7 +299,40 @@ class RunTasksViewModel(
         _operationBlocked.value = false
     }
 
-    fun setBackupEnabled(value: Boolean) = _uiState.update { it.copy(backupEnabled = value) }
+    fun setBackupEnabled(enabled: Boolean) {
+        _uiState.update { it.copy(backupEnabled = enabled) }
+    }
+
+    fun setCustomDirectoriesBackupEnabled(enabled: Boolean) {
+        _uiState.update { it.copy(customDirectoriesBackupEnabled = enabled) }
+    }
+
+    fun addCustomDirectory(uriString: String) {
+        _uiState.update { state ->
+            if (state.customDirectories.none { it.uri == uriString }) {
+                state.copy(customDirectories = state.customDirectories + CustomDirectory(uriString))
+            } else {
+                state
+            }
+        }
+    }
+
+    fun toggleCustomDirectory(uriString: String) {
+        _uiState.update { state ->
+            state.copy(
+                customDirectories = state.customDirectories.map {
+                    if (it.uri == uriString) it.copy(isSelected = !it.isSelected) else it
+                }
+            )
+        }
+    }
+
+    fun removeCustomDirectory(uriString: String) {
+        _uiState.update { state ->
+            state.copy(customDirectories = state.customDirectories.filter { it.uri != uriString })
+        }
+    }
+
     fun setUnlockRepo(value: Boolean) = _uiState.update { it.copy(maintenance = it.maintenance.copy(unlockRepo = value)) }
     fun setForgetSnapshots(value: Boolean) = _uiState.update { it.copy(maintenance = it.maintenance.copy(forgetSnapshots = value)) }
     fun setPruneRepo(value: Boolean) = _uiState.update { it.copy(maintenance = it.maintenance.copy(pruneRepo = value)) }

@@ -91,6 +91,7 @@
     <string name="dialog_discard_changes_message">You have unsaved changes. Are you sure you want to discard them?</string>
     <string name="action_discard">Discard</string>
     <string name="error_with_message">Error: %1$s</string>
+    <string name="error_cannot_backup_repo_to_itself">Cannot add the repository itself as a custom directory to backup.</string>
     <string name="no_snapshots_found_for_repository">No snapshots found for the selected repository.</string>
     <plurals name="snapshots_count">
         <item quantity="one">Snapshot (%1$d)</item>

@@ -269,6 +269,25 @@ class SchedulesViewModel(
     }
 
     fun addCustomDirectory(uriString: String) {
+        val repoKey = _uiState.value.selectedRepoKey
+        val repository = repoKey?.let { repositoriesRepository.getRepositoryByKey(it) }
+        
+        if (repository != null && repository.backendType == io.github.hddq.restoid.data.RepositoryBackendType.LOCAL) {
+            val repoUri = android.net.Uri.parse(repository.path)
+            val customDirUri = android.net.Uri.parse(uriString)
+            val repoPath = io.github.hddq.restoid.util.StorageUtils.getPathFromTreeUri(repoUri) ?: repository.path
+            val customDirPath = io.github.hddq.restoid.util.StorageUtils.getPathFromTreeUri(customDirUri) ?: uriString
+            
+            if (repoPath == customDirPath) {
+                android.widget.Toast.makeText(
+                    application,
+                    application.getString(io.github.hddq.restoid.R.string.error_cannot_backup_repo_to_itself),
+                    android.widget.Toast.LENGTH_LONG
+                ).show()
+                return
+            }
+        }
+
         _addEditState.update { state ->
             if (state.customDirectories.none { it.uri == uriString }) {
                 state.copy(customDirectories = state.customDirectories + io.github.hddq.restoid.model.CustomDirectory(uriString))

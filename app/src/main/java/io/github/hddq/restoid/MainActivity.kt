@@ -632,14 +632,82 @@ class MainActivity : FragmentActivity() {
                                 snapshotId = backStackEntry.arguments?.getString("snapshotId")
                             )
                         }
-                        composable(
-                            route = "${Screen.Restore.route}/{snapshotId}",
+                        navigation(
+                            startDestination = "${Screen.Restore.route}/{snapshotId}",
+                            route = "restore_graph/{snapshotId}",
                             arguments = listOf(navArgument("snapshotId") { type = NavType.StringType })
-                        ) { backStackEntry ->
-                            RestoreScreen(
-                                navController = navController,
-                                snapshotId = backStackEntry.arguments?.getString("snapshotId")
-                            )
+                        ) {
+                            composable(
+                                route = "${Screen.Restore.route}/{snapshotId}",
+                                arguments = listOf(navArgument("snapshotId") { type = NavType.StringType })
+                            ) { backStackEntry ->
+                                val parentEntry = remember(backStackEntry) {
+                                    navController.getBackStackEntry("restore_graph/{snapshotId}")
+                                }
+                                val snapshotId = parentEntry.arguments?.getString("snapshotId") ?: ""
+                                val viewModel: RestoreViewModel = viewModel(
+                                    viewModelStoreOwner = parentEntry,
+                                    factory = RestoreViewModelFactory(
+                                        app,
+                                        app.repositoriesRepository,
+                                        app.resticBinaryManager,
+                                        app.resticRepository,
+                                        app.appInfoRepository,
+                                        app.metadataRepository,
+                                        app.preferencesRepository,
+                                        app.operationWorkRepository,
+                                        snapshotId
+                                    )
+                                )
+                                RestoreScreen(
+                                    viewModel = viewModel,
+                                    onNavigateToOperationProgress = { navController.navigate(Screen.OperationProgress.route) { launchSingleTop = true } },
+                                    onNavigateToAppsConfig = { navController.navigate(io.github.hddq.restoid.ui.restore.RestoreRoutes.AppsConfig) },
+                                    onNavigateToCustomDirectoriesConfig = { navController.navigate(io.github.hddq.restoid.ui.restore.RestoreRoutes.CustomDirectoriesConfig) }
+                                )
+                            }
+                            composable(io.github.hddq.restoid.ui.restore.RestoreRoutes.AppsConfig) { backStackEntry ->
+                                val parentEntry = remember(backStackEntry) {
+                                    navController.getBackStackEntry("restore_graph/{snapshotId}")
+                                }
+                                val snapshotId = parentEntry.arguments?.getString("snapshotId") ?: ""
+                                val vm: RestoreViewModel = viewModel(
+                                    viewModelStoreOwner = parentEntry,
+                                    factory = RestoreViewModelFactory(
+                                        app,
+                                        app.repositoriesRepository,
+                                        app.resticBinaryManager,
+                                        app.resticRepository,
+                                        app.appInfoRepository,
+                                        app.metadataRepository,
+                                        app.preferencesRepository,
+                                        app.operationWorkRepository,
+                                        snapshotId
+                                    )
+                                )
+                                io.github.hddq.restoid.ui.screens.RestoreAppsConfigScreen(viewModel = vm)
+                            }
+                            composable(io.github.hddq.restoid.ui.restore.RestoreRoutes.CustomDirectoriesConfig) { backStackEntry ->
+                                val parentEntry = remember(backStackEntry) {
+                                    navController.getBackStackEntry("restore_graph/{snapshotId}")
+                                }
+                                val snapshotId = parentEntry.arguments?.getString("snapshotId") ?: ""
+                                val vm: RestoreViewModel = viewModel(
+                                    viewModelStoreOwner = parentEntry,
+                                    factory = RestoreViewModelFactory(
+                                        app,
+                                        app.repositoriesRepository,
+                                        app.resticBinaryManager,
+                                        app.resticRepository,
+                                        app.appInfoRepository,
+                                        app.metadataRepository,
+                                        app.preferencesRepository,
+                                        app.operationWorkRepository,
+                                        snapshotId
+                                    )
+                                )
+                                io.github.hddq.restoid.ui.screens.RestoreCustomDirectoriesConfigScreen(viewModel = vm)
+                            }
                         }
                         composable(Screen.Licenses.route) { LicensesScreen(onNavigateUp = { navController.navigateUp() }) }
                         composable(Screen.OperationProgress.route) {

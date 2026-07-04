@@ -112,6 +112,12 @@ class RestoreViewModel(
 
     private val _allowDowngrade = MutableStateFlow(false)
     val allowDowngrade = _allowDowngrade.asStateFlow()
+    
+    private val _restoreAppsEnabled = MutableStateFlow(true)
+    val restoreAppsEnabled = _restoreAppsEnabled.asStateFlow()
+
+    private val _restoreCustomDirectoriesEnabled = MutableStateFlow(false)
+    val restoreCustomDirectoriesEnabled = _restoreCustomDirectoriesEnabled.asStateFlow()
 
     private val _isRestoring = MutableStateFlow(false)
     val isRestoring = _isRestoring.asStateFlow()
@@ -266,6 +272,17 @@ class RestoreViewModel(
             detail.appInfo.packageName to (_appRestoreTypes.value[detail.appInfo.packageName] ?: _restoreTypes.value)
         }
         _customDirectories.value = metadata?.customDirectories?.mapValues { true } ?: emptyMap()
+        if (_customDirectories.value.isNotEmpty()) {
+            _restoreCustomDirectoriesEnabled.value = true
+        }
+    }
+
+    fun setRestoreAppsEnabled(enabled: Boolean) {
+        _restoreAppsEnabled.value = enabled
+    }
+
+    fun setRestoreCustomDirectoriesEnabled(enabled: Boolean) {
+        _restoreCustomDirectoriesEnabled.value = enabled
     }
 
     private fun findBackedUpItems(snapshot: SnapshotInfo, pkg: String, hasPermissionBackup: Boolean): List<String> {
@@ -296,7 +313,17 @@ class RestoreViewModel(
         val selectedRepository = selectedRepoKey?.let { repositoriesRepository.getRepositoryByKey(it) }
         val selectedRepoPath = selectedRepository?.path
         val currentSnapshot = _snapshot.value
-        val selectedApps = _backupDetails.value.filter { it.appInfo.isSelected && (_allowDowngrade.value || !it.isDowngrade) }
+        val selectedApps = if (_restoreAppsEnabled.value) {
+            _backupDetails.value.filter { it.appInfo.isSelected && (_allowDowngrade.value || !it.isDowngrade) }
+        } else {
+            emptyList()
+        }
+
+        val selectedCustomDirectories = if (_restoreCustomDirectoriesEnabled.value) {
+            _customDirectories.value.filter { it.value }.keys.toList()
+        } else {
+            emptyList()
+        }
 
         if (resticState !is ResticState.Installed || selectedRepoPath == null || currentSnapshot == null) {
             _restoreProgress.value = OperationProgress(

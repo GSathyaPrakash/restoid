@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -39,28 +40,26 @@ import io.github.hddq.restoid.ui.restore.RestoreViewModelFactory
 import io.github.hddq.restoid.ui.shared.TaskRow
 
 @Composable
-fun RestoreScreen(navController: NavController, snapshotId: String?, modifier: Modifier = Modifier) {
+fun RestoreScreen(
+    viewModel: RestoreViewModel,
+    onNavigateToOperationProgress: () -> Unit,
+    onNavigateToAppsConfig: () -> Unit,
+    onNavigateToCustomDirectoriesConfig: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     val application = LocalContext.current.applicationContext as RestoidApplication
-    val viewModel: RestoreViewModel = viewModel(
-        factory = RestoreViewModelFactory(
-            application,
-            application.repositoriesRepository,
-            application.resticBinaryManager,
-            application.resticRepository,
-            application.appInfoRepository,
-            application.metadataRepository,
-            application.preferencesRepository,
-            application.operationWorkRepository,
-            snapshotId ?: ""
-        )
-    )
-
     val backupDetails by viewModel.backupDetails.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
-    val restoreTypes by viewModel.restoreTypes.collectAsState()
-    val appRestoreTypes by viewModel.appRestoreTypes.collectAsState()
     val allowDowngrade by viewModel.allowDowngrade.collectAsState()
     val operationBlocked by viewModel.operationBlocked.collectAsState()
+    val customDirectories by viewModel.customDirectories.collectAsState()
+    
+    val restoreAppsEnabled by viewModel.restoreAppsEnabled.collectAsState()
+    val restoreCustomDirectoriesEnabled by viewModel.restoreCustomDirectoriesEnabled.collectAsState()
+    val restoreTypes by viewModel.restoreTypes.collectAsState()
+    val appRestoreTypes by viewModel.appRestoreTypes.collectAsState()
+
+    val context = LocalContext.current
 
     LaunchedEffect(operationBlocked) {
         if (operationBlocked) {
@@ -72,48 +71,82 @@ fun RestoreScreen(navController: NavController, snapshotId: String?, modifier: M
     LaunchedEffect(viewModel) {
         viewModel.uiEvents.collect { event ->
             when (event) {
-                RestoreUiEvent.NavigateToOperationProgress -> navController.navigate(Screen.OperationProgress.route) {
-                    launchSingleTop = true
-                }
+                RestoreUiEvent.NavigateToOperationProgress -> onNavigateToOperationProgress()
             }
         }
     }
 
-    RestoreSelectionContent(
-        modifier = modifier,
-        backupDetails = backupDetails,
-        isLoading = isLoading,
-        restoreTypes = restoreTypes,
-        appRestoreTypes = appRestoreTypes,
-        allowDowngrade = allowDowngrade,
-        onToggleApp = viewModel::toggleRestoreAppSelection,
-        onToggleAll = viewModel::toggleAllRestoreSelection,
-        onSetAppRestoreTypes = viewModel::setAppRestoreTypes,
-        onSetSelectedAppsRestoreTypes = viewModel::setSelectedAppsRestoreTypes,
-        onToggleAllowDowngrade = viewModel::setAllowDowngrade
-    )
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 88.dp, top = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        item {
+            Column {
+                Text(
+                    text = stringResource(R.string.operation_restore),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+                ) {
+                    val selectableBackupDetails = backupDetails.filter { allowDowngrade || !it.isDowngrade }
+                    TaskRow(
+                        title = stringResource(R.string.run_tasks_applications),
+                        subtitle = buildSelectedRestoreTypesSummary(selectableBackupDetails, appRestoreTypes, restoreTypes, context),
+                        checked = restoreAppsEnabled,
+                        onCheckedChange = viewModel::setRestoreAppsEnabled,
+                        onNavigate = onNavigateToAppsConfig
+                    )
+                    HorizontalDivider(color = MaterialTheme.colorScheme.background)
+                    
+                    val customDirsList = customDirectories.map { io.github.hddq.restoid.model.CustomDirectory(it.key, it.value) }
+                    TaskRow(
+                        title = stringResource(R.string.run_tasks_custom_directories),
+                        subtitle = io.github.hddq.restoid.ui.shared.buildCustomDirectoriesSubtitle(customDirsList, context),
+                        checked = restoreCustomDirectoriesEnabled,
+                        onCheckedChange = viewModel::setRestoreCustomDirectoriesEnabled,
+                        onNavigate = onNavigateToCustomDirectoriesConfig
+                    )
+                }
+            }
+        }
+        
+        if (isLoading) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+        }
+    }
 }
 
 @Composable
-fun RestoreSelectionContent(
-    modifier: Modifier = Modifier,
-    backupDetails: List<BackupDetail>,
-    isLoading: Boolean,
-    restoreTypes: RestoreTypes,
-    appRestoreTypes: Map<String, RestoreTypes>,
-    allowDowngrade: Boolean,
-    onToggleApp: (String) -> Unit,
-    onToggleAll: () -> Unit,
-    onSetAppRestoreTypes: (String, RestoreTypes) -> Unit,
-    onSetSelectedAppsRestoreTypes: (RestoreTypes) -> Unit,
-    onToggleAllowDowngrade: (Boolean) -> Unit
+fun RestoreAppsConfigScreen(
+    viewModel: RestoreViewModel,
+    modifier: Modifier = Modifier
 ) {
+    val backupDetails by viewModel.backupDetails.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val allowDowngrade by viewModel.allowDowngrade.collectAsState()
+    val restoreTypes by viewModel.restoreTypes.collectAsState()
+    val appRestoreTypes by viewModel.appRestoreTypes.collectAsState()
+    
     val selectableBackupDetails = backupDetails.filter { allowDowngrade || !it.isDowngrade }
     val isAllSelected = selectableBackupDetails.isNotEmpty() && selectableBackupDetails.all { it.appInfo.isSelected }
     var selectedAppPackageName by remember { mutableStateOf<String?>(null) }
     var showBulkRestoreTypesSheet by remember { mutableStateOf(false) }
     val context = LocalContext.current
-
+    
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 88.dp, top = 8.dp),
@@ -136,24 +169,13 @@ fun RestoreSelectionContent(
                     TaskRow(
                         title = stringResource(R.string.allow_downgrade),
                         checked = allowDowngrade,
-                        onCheckedChange = onToggleAllowDowngrade
+                        onCheckedChange = viewModel::setAllowDowngrade
                     )
                 }
             }
         }
 
-        if (isLoading) {
-            item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            }
-        } else if (backupDetails.isEmpty() && !isLoading) {
+        if (backupDetails.isEmpty() && !isLoading) {
             item {
                 Text(
                     stringResource(R.string.no_app_data_found_in_snapshot),
@@ -171,31 +193,28 @@ fun RestoreSelectionContent(
                     )
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceContainer
-                        )
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
                     ) {
                         Column {
                             io.github.hddq.restoid.ui.shared.SelectAllListItem(
-                                isChecked = isAllSelected,
-                                subtitle = buildSelectedRestoreTypesSummary(selectableBackupDetails, appRestoreTypes, restoreTypes, context),
-                                onClick = { showBulkRestoreTypesSheet = true },
-                                onToggle = onToggleAll
+                            isChecked = isAllSelected,
+                            subtitle = buildSelectedRestoreTypesSummary(selectableBackupDetails, appRestoreTypes, restoreTypes, context),
+                            onClick = { showBulkRestoreTypesSheet = true },
+                            onToggle = viewModel::toggleAllRestoreSelection
+                        )
+
+                        HorizontalDivider(color = MaterialTheme.colorScheme.background)
+
+                        backupDetails.forEachIndexed { index, detail ->
+                            RestoreAppListItem(
+                                detail = detail,
+                                allowDowngrade = allowDowngrade,
+                                restoreTypes = appRestoreTypes[detail.appInfo.packageName] ?: restoreTypes,
+                                onClick = { selectedAppPackageName = detail.appInfo.packageName },
+                                onToggle = { viewModel.toggleRestoreAppSelection(detail.appInfo.packageName) }
                             )
-
-                            HorizontalDivider(color = MaterialTheme.colorScheme.background)
-
-                            backupDetails.forEachIndexed { index, detail ->
-                                RestoreAppListItem(
-                                    detail = detail,
-                                    allowDowngrade = allowDowngrade,
-                                    restoreTypes = appRestoreTypes[detail.appInfo.packageName] ?: restoreTypes,
-                                    onClick = { selectedAppPackageName = detail.appInfo.packageName },
-                                    onToggle = { onToggleApp(detail.appInfo.packageName) }
-                                )
-                                if (index < backupDetails.size - 1) {
-                                    HorizontalDivider(color = MaterialTheme.colorScheme.background)
-                                }
+                            if (index < backupDetails.size - 1) {
+                                HorizontalDivider(color = MaterialTheme.colorScheme.background)
                             }
                         }
                     }
@@ -203,12 +222,13 @@ fun RestoreSelectionContent(
             }
         }
     }
+    }
 
     if (showBulkRestoreTypesSheet) {
         RestoreTypesBottomSheet(
             title = stringResource(R.string.toggle_all),
             restoreTypes = selectedBulkRestoreTypes(selectableBackupDetails, appRestoreTypes, restoreTypes),
-            onRestoreTypesChange = onSetSelectedAppsRestoreTypes,
+            onRestoreTypesChange = viewModel::setSelectedAppsRestoreTypes,
             onDismissRequest = { showBulkRestoreTypesSheet = false }
         )
     }
@@ -219,9 +239,65 @@ fun RestoreSelectionContent(
             RestoreTypesBottomSheet(
                 title = detail.appInfo.name,
                 restoreTypes = appRestoreTypes[packageName] ?: restoreTypes,
-                onRestoreTypesChange = { onSetAppRestoreTypes(packageName, it) },
+                onRestoreTypesChange = { viewModel.setAppRestoreTypes(packageName, it) },
                 onDismissRequest = { selectedAppPackageName = null }
             )
+        }
+    }
+}
+
+@Composable
+fun RestoreCustomDirectoriesConfigScreen(
+    viewModel: RestoreViewModel,
+    modifier: Modifier = Modifier
+) {
+    val customDirectories by viewModel.customDirectories.collectAsState()
+    val customDirectoriesList = customDirectories.toList()
+
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 88.dp, top = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        if (customDirectoriesList.isEmpty()) {
+            item {
+                Text(
+                    stringResource(R.string.run_tasks_custom_directories_subtitle_none),
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+        } else {
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+                ) {
+                    Column {
+                        val isAllCustomDirsSelected = customDirectoriesList.all { it.second }
+                        val selectedCount = customDirectoriesList.count { it.second }
+                        
+                        io.github.hddq.restoid.ui.shared.SelectAllListItem(
+                            isChecked = isAllCustomDirsSelected,
+                            subtitle = if (selectedCount > 0) "$selectedCount selected" else "None selected",
+                            onClick = null,
+                            onToggle = viewModel::toggleAllCustomDirectoriesSelection
+                        )
+
+                        HorizontalDivider(color = MaterialTheme.colorScheme.background)
+
+                        customDirectoriesList.forEachIndexed { index, (path, isSelected) ->
+                            RestoreCustomDirListItem(
+                                path = path,
+                                isSelected = isSelected,
+                                onToggle = { viewModel.toggleCustomDirectory(path) }
+                            )
+                            if (index < customDirectoriesList.size - 1) {
+                                HorizontalDivider(color = MaterialTheme.colorScheme.background)
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -492,4 +568,56 @@ private fun selectedBulkRestoreTypes(
         .firstOrNull { it.appInfo.isSelected }
         ?.let { appRestoreTypes[it.appInfo.packageName] ?: defaultRestoreTypes }
         ?: defaultRestoreTypes
+}
+
+@Composable
+private fun RestoreCustomDirListItem(
+    path: String,
+    isSelected: Boolean,
+    onToggle: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onToggle)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            Icons.Default.Folder,
+            contentDescription = null,
+            modifier = Modifier.size(40.dp),
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Spacer(Modifier.width(16.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = path.substringAfterLast("/").ifEmpty { path },
+                style = MaterialTheme.typography.bodyLarge,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = path,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        Spacer(Modifier.width(16.dp))
+        Switch(
+            checked = isSelected,
+            onCheckedChange = { onToggle() },
+            thumbContent = if (isSelected) {
+                {
+                    Icon(
+                        imageVector = Icons.Filled.Check,
+                        contentDescription = null,
+                        modifier = Modifier.size(SwitchDefaults.IconSize),
+                    )
+                }
+            } else null
+        )
+    }
 }

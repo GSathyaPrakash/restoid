@@ -95,6 +95,9 @@ class RestoreViewModel(
     private val _backupDetails = MutableStateFlow<List<BackupDetail>>(emptyList())
     val backupDetails = _backupDetails.asStateFlow()
 
+    private val _customDirectories = MutableStateFlow<Map<String, Boolean>>(emptyMap())
+    val customDirectories = _customDirectories.asStateFlow()
+
     private val _isLoading = MutableStateFlow(true)
     val isLoading = _isLoading.asStateFlow()
 
@@ -109,6 +112,12 @@ class RestoreViewModel(
 
     private val _allowDowngrade = MutableStateFlow(false)
     val allowDowngrade = _allowDowngrade.asStateFlow()
+    
+    private val _restoreAppsEnabled = MutableStateFlow(true)
+    val restoreAppsEnabled = _restoreAppsEnabled.asStateFlow()
+
+    private val _restoreCustomDirectoriesEnabled = MutableStateFlow(false)
+    val restoreCustomDirectoriesEnabled = _restoreCustomDirectoriesEnabled.asStateFlow()
 
     private val _isRestoring = MutableStateFlow(false)
     val isRestoring = _isRestoring.asStateFlow()
@@ -262,6 +271,18 @@ class RestoreViewModel(
         _appRestoreTypes.value = details.associate { detail ->
             detail.appInfo.packageName to (_appRestoreTypes.value[detail.appInfo.packageName] ?: _restoreTypes.value)
         }
+        _customDirectories.value = metadata?.customDirectories?.mapValues { true } ?: emptyMap()
+        if (_customDirectories.value.isNotEmpty()) {
+            _restoreCustomDirectoriesEnabled.value = true
+        }
+    }
+
+    fun setRestoreAppsEnabled(enabled: Boolean) {
+        _restoreAppsEnabled.value = enabled
+    }
+
+    fun setRestoreCustomDirectoriesEnabled(enabled: Boolean) {
+        _restoreCustomDirectoriesEnabled.value = enabled
     }
 
     private fun findBackedUpItems(snapshot: SnapshotInfo, pkg: String, hasPermissionBackup: Boolean): List<String> {
@@ -292,7 +313,17 @@ class RestoreViewModel(
         val selectedRepository = selectedRepoKey?.let { repositoriesRepository.getRepositoryByKey(it) }
         val selectedRepoPath = selectedRepository?.path
         val currentSnapshot = _snapshot.value
-        val selectedApps = _backupDetails.value.filter { it.appInfo.isSelected && (_allowDowngrade.value || !it.isDowngrade) }
+        val selectedApps = if (_restoreAppsEnabled.value) {
+            _backupDetails.value.filter { it.appInfo.isSelected && (_allowDowngrade.value || !it.isDowngrade) }
+        } else {
+            emptyList()
+        }
+
+        val selectedCustomDirectories = if (_restoreCustomDirectoriesEnabled.value) {
+            _customDirectories.value.filter { it.value }.keys.toList()
+        } else {
+            emptyList()
+        }
 
         if (resticState !is ResticState.Installed || selectedRepoPath == null || currentSnapshot == null) {
             _restoreProgress.value = OperationProgress(
@@ -303,16 +334,18 @@ class RestoreViewModel(
             return
         }
 
-        if (selectedApps.isEmpty()) {
+        val selectedCustomDirs = _customDirectories.value.filterValues { it }.keys.toList()
+
+        if (selectedApps.isEmpty() && selectedCustomDirs.isEmpty()) {
             _restoreProgress.value = OperationProgress(
                 isFinished = true,
-                error = application.getString(R.string.restore_error_no_apps_selected),
-                finalSummary = application.getString(R.string.restore_error_no_apps_selected)
+                error = application.getString(R.string.restore_error_no_items_selected),
+                finalSummary = application.getString(R.string.restore_error_no_items_selected)
             )
             return
         }
 
-        if (selectedApps.none { effectiveRestoreTypes(it.appInfo.packageName).anyEnabled() }) {
+        if (selectedApps.isNotEmpty() && selectedApps.none { effectiveRestoreTypes(it.appInfo.packageName).anyEnabled() }) {
             _restoreProgress.value = OperationProgress(
                 isFinished = true,
                 error = application.getString(R.string.restore_error_no_restore_types_selected),
@@ -377,7 +410,8 @@ class RestoreViewModel(
                     appName = it.appInfo.name
                 )
             },
-            appRestoreTypes = selectedApps.associate { it.appInfo.packageName to effectiveRestoreTypes(it.appInfo.packageName).toSelection() }
+            appRestoreTypes = selectedApps.associate { it.appInfo.packageName to effectiveRestoreTypes(it.appInfo.packageName).toSelection() },
+            selectedCustomDirectories = selectedCustomDirs
         )
 
         viewModelScope.launch(Dispatchers.IO) {
@@ -434,6 +468,21 @@ class RestoreViewModel(
                 val canBeSelected = _allowDowngrade.value || !detail.isDowngrade
                 detail.copy(appInfo = detail.appInfo.copy(isSelected = shouldSelectAll && canBeSelected))
             }
+        }
+    }
+
+    fun toggleCustomDirectory(path: String) {
+        _customDirectories.update { current ->
+            current.toMutableMap().apply {
+                this[path] = !(this[path] ?: true)
+            }
+        }
+    }
+
+    fun toggleAllCustomDirectoriesSelection() {
+        _customDirectories.update { current ->
+            val shouldSelectAll = current.values.any { !it }
+            current.mapValues { shouldSelectAll }
         }
     }
 

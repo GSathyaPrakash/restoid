@@ -16,6 +16,21 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Switch
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.clickable
+import android.content.Context
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -41,6 +56,7 @@ fun RunTasksScreen(
     viewModel: RunTasksViewModel,
     onNavigateToOperationProgress: () -> Unit,
     onNavigateToBackupConfig: () -> Unit,
+    onNavigateToCustomDirectoriesConfig: () -> Unit,
     onNavigateToForgetConfig: () -> Unit,
     onNavigateToCheckConfig: () -> Unit,
     modifier: Modifier = Modifier
@@ -87,6 +103,14 @@ fun RunTasksScreen(
                         checked = uiState.backupEnabled,
                         onCheckedChange = viewModel::setBackupEnabled,
                         onNavigate = onNavigateToBackupConfig
+                    )
+                    HorizontalDivider(color = MaterialTheme.colorScheme.background)
+                    TaskRow(
+                        title = context.getString(R.string.run_tasks_custom_directories),
+                        subtitle = buildCustomDirectoriesSubtitle(uiState.customDirectories, context),
+                        checked = uiState.customDirectoriesBackupEnabled,
+                        onCheckedChange = viewModel::setCustomDirectoriesBackupEnabled,
+                        onNavigate = onNavigateToCustomDirectoriesConfig
                     )
                 }
             }
@@ -145,99 +169,18 @@ fun BackupConfigScreen(
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val lifecycleOwner = LocalLifecycleOwner.current
-    var selectedAppPackageName by remember { mutableStateOf<String?>(null) }
-    var showBulkBackupTypesSheet by remember { mutableStateOf(false) }
-
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                viewModel.refreshAppsList()
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
-    }
-
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 24.dp, top = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        if (uiState.isLoadingApps) {
-            item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            }
-        } else {
-            item {
-                Column {
-                    Text(
-                        text = stringResource(R.string.apps_title),
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                }
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
-                ) {
-                    Column {
-                        val isAllSelected = uiState.apps.isNotEmpty() && uiState.apps.all { it.isSelected }
-                        SelectAllListItem(
-                            isChecked = isAllSelected,
-                            subtitle = buildSelectedBackupTypesSummary(uiState.apps, uiState.appBackupTypes, uiState.backupTypes, LocalContext.current),
-                            onClick = { showBulkBackupTypesSheet = true },
-                            onToggle = viewModel::toggleAllApps
-                        )
-                        HorizontalDivider(color = MaterialTheme.colorScheme.background)
-                        uiState.apps.forEachIndexed { index, app ->
-                            val appBackupTypes = uiState.appBackupTypes[app.packageName] ?: uiState.backupTypes
-                            AppListItem(
-                                app = app,
-                                subtitle = buildBackupTypesSummary(appBackupTypes, LocalContext.current),
-                                onClick = { selectedAppPackageName = app.packageName },
-                                onToggle = { viewModel.toggleAppSelection(app.packageName) }
-                            )
-                            if (index < uiState.apps.size - 1) {
-                                HorizontalDivider(color = MaterialTheme.colorScheme.background)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    if (showBulkBackupTypesSheet) {
-        BackupTypesBottomSheet(
-            title = stringResource(R.string.backup_types_for_selected_apps),
-            backupTypes = selectedBulkBackupTypes(uiState),
-            onBackupTypesChange = viewModel::setSelectedAppsBackupTypes,
-            onDismissRequest = { showBulkBackupTypesSheet = false }
-        )
-    }
-
-    selectedAppPackageName?.let { packageName ->
-        val app = uiState.apps.firstOrNull { it.packageName == packageName }
-        if (app != null) {
-            BackupTypesBottomSheet(
-                title = app.name,
-                backupTypes = uiState.appBackupTypes[packageName] ?: uiState.backupTypes,
-                onBackupTypesChange = { viewModel.setAppBackupTypes(packageName, it) },
-                onDismissRequest = { selectedAppPackageName = null }
-            )
-        }
-    }
+    io.github.hddq.restoid.ui.shared.BackupConfigScreen(
+        isLoadingApps = uiState.isLoadingApps,
+        apps = uiState.apps,
+        appBackupTypes = uiState.appBackupTypes,
+        backupTypes = uiState.backupTypes,
+        onRefreshApps = viewModel::refreshAppsList,
+        onToggleAllApps = viewModel::toggleAllApps,
+        onToggleAppSelection = viewModel::toggleAppSelection,
+        onSetSelectedAppsBackupTypes = viewModel::setSelectedAppsBackupTypes,
+        onSetAppBackupTypes = viewModel::setAppBackupTypes,
+        modifier = modifier
+    )
 }
 
 @Composable
@@ -246,30 +189,14 @@ fun ForgetConfigScreen(
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val maintenance = uiState.maintenance
-
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 24.dp, top = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        item {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
-            ) {
-                Column {
-                    PolicySlider(stringResource(R.string.maintenance_keep_last), maintenance.keepLast, 0..20, viewModel::setKeepLast)
-                    HorizontalDivider(color = MaterialTheme.colorScheme.background)
-                    PolicySlider(stringResource(R.string.maintenance_keep_daily), maintenance.keepDaily, 0..30, viewModel::setKeepDaily)
-                    HorizontalDivider(color = MaterialTheme.colorScheme.background)
-                    PolicySlider(stringResource(R.string.maintenance_keep_weekly), maintenance.keepWeekly, 0..12, viewModel::setKeepWeekly)
-                    HorizontalDivider(color = MaterialTheme.colorScheme.background)
-                    PolicySlider(stringResource(R.string.maintenance_keep_monthly), maintenance.keepMonthly, 0..24, viewModel::setKeepMonthly)
-                }
-            }
-        }
-    }
+    io.github.hddq.restoid.ui.shared.ForgetConfigScreen(
+        maintenance = uiState.maintenance,
+        onKeepLastChange = viewModel::setKeepLast,
+        onKeepDailyChange = viewModel::setKeepDaily,
+        onKeepWeeklyChange = viewModel::setKeepWeekly,
+        onKeepMonthlyChange = viewModel::setKeepMonthly,
+        modifier = modifier
+    )
 }
 
 @Composable
@@ -278,94 +205,25 @@ fun CheckConfigScreen(
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsState()
-
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 24.dp, top = 8.dp)
-    ) {
-        item {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
-            ) {
-                TaskRow(
-                    title = stringResource(R.string.maintenance_read_all_data),
-                    subtitle = stringResource(R.string.run_tasks_check_read_all_data_description),
-                    checked = uiState.maintenance.readData,
-                    onCheckedChange = viewModel::setReadData
-                )
-            }
-        }
-    }
-}
-
-private fun buildBackupSubtitle(
-    apps: List<AppInfo>,
-    appBackupTypes: Map<String, BackupTypes>,
-    defaultBackupTypes: BackupTypes,
-    context: android.content.Context
-): String {
-    val selectedCount = apps.count { it.isSelected }
-    return context.getString(
-        R.string.run_tasks_backup_subtitle,
-        selectedCount,
-        buildSelectedBackupTypesSummary(apps, appBackupTypes, defaultBackupTypes, context)
+    io.github.hddq.restoid.ui.shared.CheckConfigScreen(
+        maintenance = uiState.maintenance,
+        onReadDataChange = viewModel::setReadData,
+        modifier = modifier
     )
 }
 
-private fun buildBackupTypesSummary(backupTypes: BackupTypes, context: android.content.Context): String {
-    val types = buildList {
-        if (backupTypes.apk) add(context.getString(R.string.backup_type_apk))
-        if (backupTypes.data) add(context.getString(R.string.backup_type_data))
-        if (backupTypes.deviceProtectedData) add(context.getString(R.string.backup_type_device_protected_data))
-        if (backupTypes.externalData) add(context.getString(R.string.backup_type_external_data))
-        if (backupTypes.obb) add(context.getString(R.string.backup_type_obb_data))
-        if (backupTypes.media) add(context.getString(R.string.backup_type_media_data))
-        if (backupTypes.permissions) add(context.getString(R.string.backup_type_permissions))
-    }.joinToString(", ")
 
-    return types.ifBlank { context.getString(R.string.backup_types_none) }
-}
 
-private fun buildSelectedBackupTypesSummary(
-    apps: List<AppInfo>,
-    appBackupTypes: Map<String, BackupTypes>,
-    defaultBackupTypes: BackupTypes,
-    context: android.content.Context
-): String {
-    val selectedTypes = apps
-        .filter { it.isSelected }
-        .map { appBackupTypes[it.packageName] ?: defaultBackupTypes }
-        .distinct()
-
-    return when (selectedTypes.size) {
-        0 -> buildBackupTypesSummary(defaultBackupTypes, context)
-        1 -> buildBackupTypesSummary(selectedTypes.first(), context)
-        else -> context.getString(R.string.backup_types_mixed)
-    }
-}
-
-private fun selectedBulkBackupTypes(state: RunTasksUiState): BackupTypes {
-    return state.apps
-        .firstOrNull { it.isSelected }
-        ?.let { state.appBackupTypes[it.packageName] ?: state.backupTypes }
-        ?: state.backupTypes
-}
-
-private fun buildForgetSubtitle(config: RunTasksMaintenanceConfig, context: android.content.Context): String {
-    return context.getString(
-        R.string.run_tasks_forget_subtitle,
-        config.keepLast,
-        config.keepDaily,
-        config.keepWeekly,
-        config.keepMonthly
+@Composable
+fun CustomDirectoriesConfigScreen(
+    viewModel: RunTasksViewModel,
+    modifier: Modifier = Modifier
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    io.github.hddq.restoid.ui.shared.CustomDirectoriesConfigScreen(
+        customDirectories = uiState.customDirectories,
+        onAddDirectory = viewModel::addCustomDirectory,
+        onToggleDirectory = viewModel::toggleCustomDirectory,
+        modifier = modifier
     )
-}
-
-private fun buildCheckSubtitle(config: RunTasksMaintenanceConfig, context: android.content.Context): String {
-    return if (config.readData) {
-        context.getString(R.string.maintenance_read_all_data)
-    } else {
-        context.getString(R.string.run_tasks_check_metadata_only)
-    }
 }

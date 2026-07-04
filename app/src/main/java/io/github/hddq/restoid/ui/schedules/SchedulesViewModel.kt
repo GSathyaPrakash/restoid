@@ -9,7 +9,7 @@ import io.github.hddq.restoid.data.ScheduleRepository
 import io.github.hddq.restoid.model.AppInfo
 import io.github.hddq.restoid.model.Schedule
 import io.github.hddq.restoid.model.TriggerConditions
-import io.github.hddq.restoid.ui.runtasks.RunTasksMaintenanceConfig
+import io.github.hddq.restoid.model.MaintenanceConfig
 import io.github.hddq.restoid.ui.shared.BackupTypes
 import io.github.hddq.restoid.ui.shared.toUiModel
 import io.github.hddq.restoid.work.RunTasksConfig
@@ -37,13 +37,15 @@ data class AddEditScheduleUiState(
     val backupTypes: BackupTypes = BackupTypes(),
     val appBackupTypes: Map<String, BackupTypes> = emptyMap(),
     val apps: List<AppInfo> = emptyList(),
-    val maintenance: RunTasksMaintenanceConfig = RunTasksMaintenanceConfig(),
+    val maintenance: MaintenanceConfig = MaintenanceConfig(),
     val triggerConditions: TriggerConditions = TriggerConditions(),
     val lastRunTimestamp: Long? = null,
     val isLoadingApps: Boolean = false,
     val isSaving: Boolean = false,
     val showConfirmDeleteDialog: Boolean = false,
-    val showDiscardChangesDialog: Boolean = false
+    val showDiscardChangesDialog: Boolean = false,
+    val customDirectoriesBackupEnabled: Boolean = false,
+    val customDirectories: List<io.github.hddq.restoid.model.CustomDirectory> = emptyList()
 )
 
 sealed interface SchedulesUiEvent {
@@ -132,7 +134,7 @@ class SchedulesViewModel(
             backupEnabled = schedule.config.backupEnabled,
             backupTypes = schedule.config.backupTypes.toUiModel(),
             appBackupTypes = schedule.config.appBackupTypes.mapValues { it.value.toUiModel() },
-            maintenance = RunTasksMaintenanceConfig(
+            maintenance = MaintenanceConfig(
                 unlockRepo = schedule.config.unlockRepo,
                 forgetSnapshots = schedule.config.forgetSnapshots,
                 pruneRepo = schedule.config.pruneRepo,
@@ -144,7 +146,9 @@ class SchedulesViewModel(
                 keepMonthly = schedule.config.keepMonthly
             ),
             triggerConditions = schedule.triggerConditions,
-            lastRunTimestamp = schedule.lastRunTimestamp
+            lastRunTimestamp = schedule.lastRunTimestamp,
+            customDirectoriesBackupEnabled = schedule.config.customDirectories.isNotEmpty(),
+            customDirectories = schedule.config.customDirectories.map { io.github.hddq.restoid.model.CustomDirectory(it, true) }
         )
         _addEditState.value = newState
         initialState = newState
@@ -188,7 +192,9 @@ class SchedulesViewModel(
                 current.appBackupTypes != initial.appBackupTypes ||
                 current.apps.map { it.packageName to it.isSelected } != initial.apps.map { it.packageName to it.isSelected } ||
                 current.maintenance != initial.maintenance ||
-                current.triggerConditions != initial.triggerConditions
+                current.triggerConditions != initial.triggerConditions ||
+                current.customDirectoriesBackupEnabled != initial.customDirectoriesBackupEnabled ||
+                current.customDirectories != initial.customDirectories
     }
 
     fun onBackPress() {
@@ -224,6 +230,7 @@ class SchedulesViewModel(
                 backupTypes = state.backupTypes.toSelection(),
                 selectedPackageNames = state.apps.filter { it.isSelected }.map { it.packageName },
                 appBackupTypes = selectedAppBackupTypes(state).mapValues { it.value.toSelection() },
+                customDirectories = if (state.customDirectoriesBackupEnabled) state.customDirectories.filter { it.isSelected }.map { it.uri } else emptyList(),
                 unlockRepo = state.maintenance.unlockRepo,
                 forgetSnapshots = state.maintenance.forgetSnapshots,
                 pruneRepo = state.maintenance.pruneRepo,
@@ -255,6 +262,56 @@ class SchedulesViewModel(
     fun setBackupExternalData(value: Boolean) = _addEditState.update { it.copy(backupTypes = it.backupTypes.copy(externalData = value)) }
     fun setBackupObb(value: Boolean) = _addEditState.update { it.copy(backupTypes = it.backupTypes.copy(obb = value)) }
     fun setBackupMedia(value: Boolean) = _addEditState.update { it.copy(backupTypes = it.backupTypes.copy(media = value)) }
+    fun setBackupPermissions(value: Boolean) = _addEditState.update { it.copy(backupTypes = it.backupTypes.copy(permissions = value)) }
+
+    fun setCustomDirectoriesBackupEnabled(enabled: Boolean) {
+        _addEditState.update { it.copy(customDirectoriesBackupEnabled = enabled) }
+    }
+
+    fun addCustomDirectory(uriString: String) {
+        val repoKey = _uiState.value.selectedRepoKey
+        val repository = repoKey?.let { repositoriesRepository.getRepositoryByKey(it) }
+        
+        if (repository != null && repository.backendType == io.github.hddq.restoid.data.RepositoryBackendType.LOCAL) {
+            val repoUri = android.net.Uri.parse(repository.path)
+            val customDirUri = android.net.Uri.parse(uriString)
+            val repoPath = io.github.hddq.restoid.util.StorageUtils.getPathFromTreeUri(repoUri) ?: repository.path
+            val customDirPath = io.github.hddq.restoid.util.StorageUtils.getPathFromTreeUri(customDirUri) ?: uriString
+            
+            if (repoPath == customDirPath) {
+                android.widget.Toast.makeText(
+                    application,
+                    application.getString(io.github.hddq.restoid.R.string.error_cannot_backup_repo_to_itself),
+                    android.widget.Toast.LENGTH_LONG
+                ).show()
+                return
+            }
+        }
+
+        _addEditState.update { state ->
+            if (state.customDirectories.none { it.uri == uriString }) {
+                state.copy(customDirectories = state.customDirectories + io.github.hddq.restoid.model.CustomDirectory(uriString))
+            } else {
+                state
+            }
+        }
+    }
+
+    fun toggleCustomDirectory(uriString: String) {
+        _addEditState.update { state ->
+            state.copy(
+                customDirectories = state.customDirectories.map {
+                    if (it.uri == uriString) it.copy(isSelected = !it.isSelected) else it
+                }
+            )
+        }
+    }
+
+    fun removeCustomDirectory(uriString: String) {
+        _addEditState.update { state ->
+            state.copy(customDirectories = state.customDirectories.filter { it.uri != uriString })
+        }
+    }
 
     fun toggleAppSelection(packageName: String) {
         _addEditState.update { state ->

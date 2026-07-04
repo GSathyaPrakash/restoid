@@ -66,6 +66,12 @@
 
     <string name="home_title" translatable="false">Restoid</string>
     <string name="run_tasks_applications">Applications</string>
+    <string name="run_tasks_custom_directories">Custom Directories</string>
+    <string name="run_tasks_custom_directories_subtitle_none">No directories selected</string>
+    <string name="run_tasks_custom_directories_subtitle_count">%1$d directories selected</string>
+    <string name="action_add_directory">Add Directory</string>
+    <string name="title_custom_directories">Custom Directories</string>
+    <string name="custom_directories_description">Select custom directories on your device to include in the backup.</string>
     <string name="run_tasks_backup_subtitle">%1$d apps selected - %2$s</string>
     <string name="run_tasks_forget_snapshots">Forget Snapshots</string>
     <string name="run_tasks_forget_subtitle">Keep last %1$d, daily %2$d, weekly %3$d, monthly %4$d</string>
@@ -85,6 +91,7 @@
     <string name="dialog_discard_changes_message">You have unsaved changes. Are you sure you want to discard them?</string>
     <string name="action_discard">Discard</string>
     <string name="error_with_message">Error: %1$s</string>
+    <string name="error_cannot_backup_repo_to_itself">Cannot add the repository itself as a custom directory to backup.</string>
     <string name="no_snapshots_found_for_repository">No snapshots found for the selected repository.</string>
     <plurals name="snapshots_count">
         <item quantity="one">Snapshot (%1$d)</item>
@@ -103,6 +110,14 @@
     <plurals name="apps_count">
         <item quantity="one">App (%1$d):</item>
         <item quantity="other">Apps (%1$d):</item>
+    </plurals>
+    <plurals name="backed_up_items_count">
+        <item quantity="one">Backed up (%1$d):</item>
+        <item quantity="other">Backed up (%1$d):</item>
+    </plurals>
+    <plurals name="custom_directories_count">
+        <item quantity="one">Custom Directory (%1$d):</item>
+        <item quantity="other">Custom Directories (%1$d):</item>
     </plurals>
     <string name="no_app_info_for_snapshot">No app information available for this snapshot.</string>
     <string name="metadata_missing_or_corrupted">Metadata is missing or corrupted.</string>
@@ -141,6 +156,10 @@
     <plurals name="snapshot_backed_up_apps_count">
         <item quantity="one">Backed up App (%1$d)</item>
         <item quantity="other">Backed up Apps (%1$d)</item>
+    </plurals>
+    <plurals name="snapshot_backed_up_custom_directories_count">
+        <item quantity="one">Backed up Custom Directory (%1$d)</item>
+        <item quantity="other">Backed up Custom Directories (%1$d)</item>
     </plurals>
     <string name="snapshot_not_found">No snapshot found.</string>
     <string name="snapshot_forgetting">Forgetting snapshot…</string>
@@ -290,19 +309,19 @@
 
     <string name="backup_error_repository_id_not_found">Repository ID not found. Cannot save metadata.</string>
     <string name="backup_stage_preparing">[%1$d/%2$d] Preparing backup...</string>
-    <string name="backup_stage_running">[%1$d/%2$d] Backing up apps…</string>
+    <string name="backup_stage_running">[%1$d/%2$d] Backing up items…</string>
     <string name="backup_stage_finalizing">[%1$d/%2$d] Finalizing backup…</string>
-    <string name="backup_error_no_files_selected">No files found to back up for the selected apps.</string>
+    <string name="backup_error_no_files_selected_for_items">No files found to back up for the selected items.</string>
     <string name="backup_error_command_failed_with_code">Restic command failed with exit code %1$d.</string>
     <string name="backup_warning_metadata_not_saved">Warning: Could not save backup metadata file locally.</string>
-    <plurals name="backup_summary_success">
-        <item quantity="one">Backed up %1$d app.</item>
-        <item quantity="other">Backed up %1$d apps.</item>
+    <plurals name="backup_summary_success_items">
+        <item quantity="one">Backed up %1$d item.</item>
+        <item quantity="other">Backed up %1$d items.</item>
     </plurals>
 
     <string name="error_fatal_with_message">A fatal error occurred: %1$s</string>
-    <string name="error_no_apps_selected">No apps selected.</string>
-    <string name="summary_no_apps_selected">No apps were selected.</string>
+    <string name="error_no_items_selected">No items selected.</string>
+    <string name="summary_no_items_selected">No items were selected.</string>
     <string name="error_no_backup_types_selected">No backup types selected.</string>
     <string name="summary_no_backup_types_selected">No backup types were selected.</string>
     <string name="error_restic_not_installed">Restic is not installed.</string>
@@ -326,12 +345,13 @@
     <string name="restore_stage_processing_apps">Processing Apps</string>
     <string name="restore_stage_cleanup">Cleanup</string>
     <string name="restore_error_preflight_failed">Pre-restore checks failed.</string>
-    <string name="restore_error_no_apps_selected">No apps selected for restore.</string>
+    <string name="restore_error_no_items_selected">No items selected for restore.</string>
     <string name="restore_error_no_restore_types_selected">No restore types selected.</string>
     <string name="restore_error_password_not_found">Password not found for repository.</string>
-    <string name="restore_error_no_files_found">No files found in the snapshot for the selected apps.</string>
+    <string name="restore_error_no_files_found">No files found in the snapshot for the selected items.</string>
     <string name="restore_error_command_failed">Restic restore command failed.</string>
-    <string name="restore_stage_processing_template">[%1$d/%2$d] Processing Apps</string>
+    <string name="restore_stage_processing_template_apps">[%1$d/%2$d] Processing Apps</string>
+    <string name="restore_stage_processing_template_custom_directories">[%1$d/%2$d] Processing Custom Directories</string>
     <string name="restore_failure_install_commit">%1$s: Install commit failed: %2$s</string>
     <string name="restore_failure_write_apk_splits">%1$s: Failed to write APK splits.</string>
     <string name="restore_failure_create_install_session">%1$s: Failed to create install session.</string>
@@ -339,14 +359,16 @@
     <string name="restore_failure_data_restore">%1$s: Data restore failed or incomplete.</string>
     <string name="restore_failure_permissions_app_not_installed">%1$s: Failed to restore permissions because the app is not installed.</string>
     <string name="restore_failure_permissions_partial">%1$s: Failed to restore some permissions: %2$s</string>
+    <string name="restore_stage_processing_custom_directories">Processing Custom Directories…</string>
+    <string name="restore_failure_custom_directory">Failed to restore custom directory %1$s</string>
     <string name="restore_summary_finished_in">Restore finished in %1$s. </string>
-    <plurals name="restore_summary_processed">
-        <item quantity="one">Successfully processed %1$d app.</item>
-        <item quantity="other">Successfully processed %1$d apps.</item>
+    <plurals name="restore_summary_processed_items">
+        <item quantity="one">Successfully processed %1$d item.</item>
+        <item quantity="other">Successfully processed %1$d items.</item>
     </plurals>
-    <plurals name="restore_summary_failed">
-        <item quantity="one"> Failed to restore %1$d app.</item>
-        <item quantity="other"> Failed to restore %1$d apps.</item>
+    <plurals name="restore_summary_failed_items">
+        <item quantity="one"> Failed to restore %1$d item.</item>
+        <item quantity="other"> Failed to restore %1$d items.</item>
     </plurals>
     <string name="restore_summary_details">\n\nDetails:\n- %1$s</string>
 

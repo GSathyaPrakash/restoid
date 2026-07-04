@@ -12,7 +12,6 @@ import io.github.hddq.restoid.data.ResticState
 import io.github.hddq.restoid.model.AppInfo
 import io.github.hddq.restoid.ui.shared.BackupTypes
 import io.github.hddq.restoid.ui.shared.OperationProgress
-import io.github.hddq.restoid.work.BackupTypeSelection
 import io.github.hddq.restoid.work.OperationWorkRepository
 import io.github.hddq.restoid.work.RunTasksWorkRequest
 import kotlinx.coroutines.Dispatchers
@@ -23,18 +22,9 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import io.github.hddq.restoid.model.MaintenanceConfig
 
-data class RunTasksMaintenanceConfig(
-    val unlockRepo: Boolean = false,
-    val forgetSnapshots: Boolean = false,
-    val pruneRepo: Boolean = false,
-    val checkRepo: Boolean = true,
-    val readData: Boolean = false,
-    val keepLast: Int = 5,
-    val keepDaily: Int = 7,
-    val keepWeekly: Int = 4,
-    val keepMonthly: Int = 6
-)
+import io.github.hddq.restoid.model.CustomDirectory
 
 data class RunTasksUiState(
     val apps: List<AppInfo> = emptyList(),
@@ -42,9 +32,11 @@ data class RunTasksUiState(
     val backupEnabled: Boolean = true,
     val backupTypes: BackupTypes = BackupTypes(),
     val appBackupTypes: Map<String, BackupTypes> = emptyMap(),
-    val maintenance: RunTasksMaintenanceConfig = RunTasksMaintenanceConfig(),
+    val maintenance: MaintenanceConfig = MaintenanceConfig(),
     val isRunning: Boolean = false,
-    val progress: OperationProgress = OperationProgress()
+    val progress: OperationProgress = OperationProgress(),
+    val customDirectoriesBackupEnabled: Boolean = false,
+    val customDirectories: List<CustomDirectory> = emptyList()
 )
 
 sealed interface RunTasksUiEvent {
@@ -64,7 +56,14 @@ class RunTasksViewModel(
         RunTasksUiState(
             backupEnabled = preferencesRepository.loadRunTasksBackupEnabled(),
             backupTypes = preferencesRepository.loadBackupTypes(),
-            maintenance = preferencesRepository.loadMaintenanceState()
+            maintenance = preferencesRepository.loadMaintenanceState(),
+            customDirectoriesBackupEnabled = preferencesRepository.loadCustomDirectoriesBackupEnabled(),
+            customDirectories = preferencesRepository.loadCustomDirectoriesAll().map { uri ->
+                CustomDirectory(
+                    uri = uri,
+                    isSelected = preferencesRepository.loadCustomDirectoriesSelected().contains(uri)
+                )
+            }
         )
     )
     val uiState = _uiState.asStateFlow()
@@ -138,6 +137,11 @@ class RunTasksViewModel(
         val selectedPackages = _uiState.value.apps.filter { it.isSelected }.map { it.packageName }.toSet()
         preferencesRepository.saveRunTasksSelectedApps(allAppsSelected, selectedPackages)
 
+        preferencesRepository.saveCustomDirectoriesBackupEnabled(_uiState.value.customDirectoriesBackupEnabled)
+        val allCustomDirs = _uiState.value.customDirectories.map { it.uri }.toSet()
+        val selectedCustomDirs = _uiState.value.customDirectories.filter { it.isSelected }.map { it.uri }.toSet()
+        preferencesRepository.saveCustomDirectories(allCustomDirs, selectedCustomDirs)
+
         val errorState = preflightChecks()
         if (errorState != null) {
             _uiState.update { it.copy(isRunning = false, progress = errorState) }
@@ -165,6 +169,7 @@ class RunTasksViewModel(
             backupTypes = _uiState.value.backupTypes.toSelection(),
             selectedPackageNames = _uiState.value.apps.filter { it.isSelected }.map { it.packageName },
             appBackupTypes = selectedAppBackupTypes().mapValues { it.value.toSelection() },
+            customDirectories = if (_uiState.value.customDirectoriesBackupEnabled) selectedCustomDirs.toList() else emptyList(),
             unlockRepo = maintenance.unlockRepo,
             forgetSnapshots = maintenance.forgetSnapshots,
             pruneRepo = maintenance.pruneRepo,
@@ -209,16 +214,17 @@ class RunTasksViewModel(
         }
 
         if (state.backupEnabled) {
-            if (state.apps.none { it.isSelected }) {
+            val hasCustomDirs = state.customDirectoriesBackupEnabled && state.customDirectories.any { it.isSelected }
+            if (state.apps.none { it.isSelected } && !hasCustomDirs) {
                 return OperationProgress(
                     isFinished = true,
-                    error = application.getString(R.string.error_no_apps_selected),
-                    finalSummary = application.getString(R.string.summary_no_apps_selected)
+                    error = application.getString(R.string.error_no_items_selected),
+                    finalSummary = application.getString(R.string.summary_no_items_selected)
                 )
             }
             val hasSelectedBackupType = state.apps
                 .filter { it.isSelected }
-                .any { app -> effectiveBackupTypes(state, app.packageName).anyEnabled() }
+                .any { app -> effectiveBackupTypes(state, app.packageName).anyEnabled() } || hasCustomDirs
             if (!hasSelectedBackupType) {
                 return OperationProgress(
                     isFinished = true,
@@ -293,7 +299,59 @@ class RunTasksViewModel(
         _operationBlocked.value = false
     }
 
-    fun setBackupEnabled(value: Boolean) = _uiState.update { it.copy(backupEnabled = value) }
+    fun setBackupEnabled(enabled: Boolean) {
+        _uiState.update { it.copy(backupEnabled = enabled) }
+    }
+
+    fun setCustomDirectoriesBackupEnabled(enabled: Boolean) {
+        _uiState.update { it.copy(customDirectoriesBackupEnabled = enabled) }
+    }
+
+    fun addCustomDirectory(uriString: String) {
+        val repoKey = repositoriesRepository.selectedRepository.value
+        val repository = repoKey?.let { repositoriesRepository.getRepositoryByKey(it) }
+        
+        if (repository != null && repository.backendType == io.github.hddq.restoid.data.RepositoryBackendType.LOCAL) {
+            val repoUri = android.net.Uri.parse(repository.path)
+            val customDirUri = android.net.Uri.parse(uriString)
+            val repoPath = io.github.hddq.restoid.util.StorageUtils.getPathFromTreeUri(repoUri) ?: repository.path
+            val customDirPath = io.github.hddq.restoid.util.StorageUtils.getPathFromTreeUri(customDirUri) ?: uriString
+            
+            if (repoPath == customDirPath) {
+                android.widget.Toast.makeText(
+                    application,
+                    application.getString(io.github.hddq.restoid.R.string.error_cannot_backup_repo_to_itself),
+                    android.widget.Toast.LENGTH_LONG
+                ).show()
+                return
+            }
+        }
+
+        _uiState.update { state ->
+            if (state.customDirectories.none { it.uri == uriString }) {
+                state.copy(customDirectories = state.customDirectories + CustomDirectory(uriString))
+            } else {
+                state
+            }
+        }
+    }
+
+    fun toggleCustomDirectory(uriString: String) {
+        _uiState.update { state ->
+            state.copy(
+                customDirectories = state.customDirectories.map {
+                    if (it.uri == uriString) it.copy(isSelected = !it.isSelected) else it
+                }
+            )
+        }
+    }
+
+    fun removeCustomDirectory(uriString: String) {
+        _uiState.update { state ->
+            state.copy(customDirectories = state.customDirectories.filter { it.uri != uriString })
+        }
+    }
+
     fun setUnlockRepo(value: Boolean) = _uiState.update { it.copy(maintenance = it.maintenance.copy(unlockRepo = value)) }
     fun setForgetSnapshots(value: Boolean) = _uiState.update { it.copy(maintenance = it.maintenance.copy(forgetSnapshots = value)) }
     fun setPruneRepo(value: Boolean) = _uiState.update { it.copy(maintenance = it.maintenance.copy(pruneRepo = value)) }

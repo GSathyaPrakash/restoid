@@ -35,7 +35,8 @@ data class BackupWorkRequest(
     val repositoryKey: String,
     val backupTypes: BackupTypeSelection,
     val selectedPackageNames: List<String>,
-    val appBackupTypes: Map<String, BackupTypeSelection> = emptyMap()
+    val appBackupTypes: Map<String, BackupTypeSelection> = emptyMap(),
+    val customDirectories: List<String> = emptyList()
 )
 
 @Serializable
@@ -45,7 +46,8 @@ data class RestoreWorkRequest(
     val restoreTypes: RestoreTypeSelection,
     val allowDowngrade: Boolean,
     val selectedApps: List<RestoreAppSelection>,
-    val appRestoreTypes: Map<String, RestoreTypeSelection> = emptyMap()
+    val appRestoreTypes: Map<String, RestoreTypeSelection> = emptyMap(),
+    val selectedCustomDirectories: List<String> = emptyList()
 )
 
 @Serializable
@@ -68,6 +70,7 @@ data class RunTasksConfig(
     val backupTypes: BackupTypeSelection,
     val selectedPackageNames: List<String>,
     val appBackupTypes: Map<String, BackupTypeSelection> = emptyMap(),
+    val customDirectories: List<String> = emptyList(),
     val unlockRepo: Boolean,
     val forgetSnapshots: Boolean,
     val pruneRepo: Boolean,
@@ -86,6 +89,7 @@ data class RunTasksWorkRequest(
     val backupTypes: BackupTypeSelection,
     val selectedPackageNames: List<String>,
     val appBackupTypes: Map<String, BackupTypeSelection> = emptyMap(),
+    val customDirectories: List<String> = emptyList(),
     val unlockRepo: Boolean,
     val forgetSnapshots: Boolean,
     val pruneRepo: Boolean,

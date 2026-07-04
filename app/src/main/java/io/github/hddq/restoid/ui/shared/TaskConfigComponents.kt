@@ -538,7 +538,7 @@ fun BackupConfigScreen(
 
 @Composable
 fun ForgetConfigScreen(
-    maintenance: io.github.hddq.restoid.ui.runtasks.RunTasksMaintenanceConfig,
+    maintenance: io.github.hddq.restoid.model.MaintenanceConfig,
     onKeepLastChange: (Int) -> Unit,
     onKeepDailyChange: (Int) -> Unit,
     onKeepWeeklyChange: (Int) -> Unit,
@@ -571,7 +571,7 @@ fun ForgetConfigScreen(
 
 @Composable
 fun CheckConfigScreen(
-    maintenance: io.github.hddq.restoid.ui.runtasks.RunTasksMaintenanceConfig,
+    maintenance: io.github.hddq.restoid.model.MaintenanceConfig,
     onReadDataChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -652,7 +652,7 @@ fun selectedBulkBackupTypes(
         ?: defaultBackupTypes
 }
 
-fun buildForgetSubtitle(config: io.github.hddq.restoid.ui.runtasks.RunTasksMaintenanceConfig, context: android.content.Context): String {
+fun buildForgetSubtitle(config: io.github.hddq.restoid.model.MaintenanceConfig, context: android.content.Context): String {
     return context.getString(
         R.string.run_tasks_forget_subtitle,
         config.keepLast,
@@ -662,7 +662,7 @@ fun buildForgetSubtitle(config: io.github.hddq.restoid.ui.runtasks.RunTasksMaint
     )
 }
 
-fun buildCheckSubtitle(config: io.github.hddq.restoid.ui.runtasks.RunTasksMaintenanceConfig, context: android.content.Context): String {
+fun buildCheckSubtitle(config: io.github.hddq.restoid.model.MaintenanceConfig, context: android.content.Context): String {
     return if (config.readData) {
         context.getString(R.string.maintenance_read_all_data)
     } else {

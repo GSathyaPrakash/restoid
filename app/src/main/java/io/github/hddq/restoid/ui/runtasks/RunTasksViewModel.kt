@@ -22,18 +22,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
-data class RunTasksMaintenanceConfig(
-    val unlockRepo: Boolean = false,
-    val forgetSnapshots: Boolean = false,
-    val pruneRepo: Boolean = false,
-    val checkRepo: Boolean = true,
-    val readData: Boolean = false,
-    val keepLast: Int = 5,
-    val keepDaily: Int = 7,
-    val keepWeekly: Int = 4,
-    val keepMonthly: Int = 6
-)
+import io.github.hddq.restoid.model.MaintenanceConfig
 
 data class CustomDirectory(
     val uri: String,
@@ -46,7 +35,7 @@ data class RunTasksUiState(
     val backupEnabled: Boolean = true,
     val backupTypes: BackupTypes = BackupTypes(),
     val appBackupTypes: Map<String, BackupTypes> = emptyMap(),
-    val maintenance: RunTasksMaintenanceConfig = RunTasksMaintenanceConfig(),
+    val maintenance: MaintenanceConfig = MaintenanceConfig(),
     val isRunning: Boolean = false,
     val progress: OperationProgress = OperationProgress(),
     val customDirectoriesBackupEnabled: Boolean = false,

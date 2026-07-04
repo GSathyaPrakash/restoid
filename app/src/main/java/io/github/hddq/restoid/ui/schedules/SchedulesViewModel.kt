@@ -9,7 +9,7 @@ import io.github.hddq.restoid.data.ScheduleRepository
 import io.github.hddq.restoid.model.AppInfo
 import io.github.hddq.restoid.model.Schedule
 import io.github.hddq.restoid.model.TriggerConditions
-import io.github.hddq.restoid.ui.runtasks.RunTasksMaintenanceConfig
+import io.github.hddq.restoid.model.MaintenanceConfig
 import io.github.hddq.restoid.ui.shared.BackupTypes
 import io.github.hddq.restoid.ui.shared.toUiModel
 import io.github.hddq.restoid.work.RunTasksConfig
@@ -37,7 +37,7 @@ data class AddEditScheduleUiState(
     val backupTypes: BackupTypes = BackupTypes(),
     val appBackupTypes: Map<String, BackupTypes> = emptyMap(),
     val apps: List<AppInfo> = emptyList(),
-    val maintenance: RunTasksMaintenanceConfig = RunTasksMaintenanceConfig(),
+    val maintenance: MaintenanceConfig = MaintenanceConfig(),
     val triggerConditions: TriggerConditions = TriggerConditions(),
     val lastRunTimestamp: Long? = null,
     val isLoadingApps: Boolean = false,
@@ -132,7 +132,7 @@ class SchedulesViewModel(
             backupEnabled = schedule.config.backupEnabled,
             backupTypes = schedule.config.backupTypes.toUiModel(),
             appBackupTypes = schedule.config.appBackupTypes.mapValues { it.value.toUiModel() },
-            maintenance = RunTasksMaintenanceConfig(
+            maintenance = MaintenanceConfig(
                 unlockRepo = schedule.config.unlockRepo,
                 forgetSnapshots = schedule.config.forgetSnapshots,
                 pruneRepo = schedule.config.pruneRepo,

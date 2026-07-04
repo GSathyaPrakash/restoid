@@ -697,6 +697,8 @@ class RepositoriesRepository(
                     if (repoExists) {
                         val checkResult = Shell.cmd(buildString {
                             if (envPrefix.isNotEmpty()) append(envPrefix).append(' ')
+                            append("HOME=").append(shellQuote(context.cacheDir.absolutePath)).append(' ')
+                            append("RESTIC_CACHE_DIR=").append(shellQuote(File(context.cacheDir, "restic").absolutePath)).append(' ')
                             append("RESTIC_PASSWORD_FILE=").append(shellQuote(passwordFile.absolutePath)).append(' ')
                             append(shellQuote(resticPath)).append(' ')
                             if (resticOptionFlags.isNotEmpty()) append(resticOptionFlags).append(' ')
@@ -769,6 +771,8 @@ class RepositoriesRepository(
                     // doesn't cause infinite retrying. `timeout` returns exit code 124 when it kills the process.
                     val checkCommand = buildString {
                         if (envPrefix.isNotEmpty()) append(envPrefix).append(' ')
+                        append("HOME=").append(shellQuote(context.cacheDir.absolutePath)).append(' ')
+                        append("RESTIC_CACHE_DIR=").append(shellQuote(File(context.cacheDir, "restic").absolutePath)).append(' ')
                         append("RESTIC_PASSWORD_FILE=").append(shellQuote(passwordFile.absolutePath)).append(' ')
                         if (backendType == RepositoryBackendType.S3) {
                             append("timeout ${S3_CHECK_TIMEOUT_SECONDS}s ")

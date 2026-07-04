@@ -373,8 +373,11 @@ class MainActivity : FragmentActivity() {
                                 )
                             }
                             Screen.Restore.route + "/{snapshotId}" -> {
+                                val parentEntry = remember(navBackStackEntry) {
+                                    navController.getBackStackEntry("restore_graph/{snapshotId}")
+                                }
                                 val viewModel: RestoreViewModel = viewModel(
-                                    viewModelStoreOwner = navBackStackEntry!!,
+                                    viewModelStoreOwner = parentEntry,
                                     factory = RestoreViewModelFactory(
                                         app,
                                         app.repositoriesRepository,

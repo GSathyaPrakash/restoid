@@ -1024,7 +1024,7 @@ class RepositoriesRepository(
         }
 
         loadRepositories()
-        if (wasEmpty) selectRepository(key)
+        selectRepository(key)
     }
 
     // Captures stderr separately so callers can inspect the error message,

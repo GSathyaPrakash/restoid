@@ -44,7 +44,7 @@
     <string name="no_app_data_found_in_snapshot">Данные в снимке отсутствуют.</string>
     <string name="restore_backup_version_with_installed">Бэкап: %1$s -&gt; Установлено: %2$s</string>
     <string name="restore_backup_version_only">Бэкап: %1$s</string>
-    <string name="home_title">Restoid</string>
+    <string name="home_title" translatable="false">Restoid</string>
     <string name="run_tasks_applications">Приложения</string>
     <string name="run_tasks_backup_subtitle">Выбрано: %1$d - %2$s</string>
     <string name="run_tasks_forget_snapshots">Удалить снимки</string>
@@ -140,7 +140,7 @@
     <string name="progress_items">Элементы</string>
     <string name="progress_size">Размер</string>
     <string name="progress_processing">Обработка:</string>
-    <string name="progress_placeholder">...</string>
+    <string name="progress_placeholder" translatable="false">...</string>
     <string name="dialog_add_repository_title">Добавить репозиторий</string>
     <string name="label_repository_type">Тип репозитория</string>
     <string name="label_repository_specification">Путь/URL</string>
@@ -150,7 +150,7 @@
     <string name="label_sftp_password">Пароль SFTP</string>
     <string name="label_sftp_ssh_key">SSH ключ</string>
     <string name="label_sftp_private_key">Приватный ключ SSH</string>
-    <string name="placeholder_sftp_private_key">-----BEGIN OPENSSH PRIVATE KEY-----\n...</string>
+    <string name="placeholder_sftp_private_key" translatable="false">-----BEGIN OPENSSH PRIVATE KEY-----\n...</string>
     <string name="label_sftp_key_passphrase">Пароль SSH-ключа</string>
     <string name="label_sftp_key_passphrase_optional">Пароль SSH-ключа (необязательно)</string>
     <string name="dialog_sftp_trust_title">Доверять SFTP серверу?</string>
@@ -159,10 +159,10 @@
     <string name="repo_backend_local">Локальная папка</string>
     <string name="repo_backend_sftp">SFTP (SSH)</string>
     <string name="repo_backend_rest">HTTP REST сервер</string>
-    <string name="repo_backend_s3">Amazon S3 / MinIO</string>
-    <string name="repo_hint_sftp">user@host:/srv/restic-repo</string>
-    <string name="repo_hint_rest">http://host:8000/</string>
-    <string name="repo_hint_s3">s3.us-east-1.amazonaws.com/bucket_name</string>
+    <string name="repo_backend_s3" translatable="false">Amazon S3 / MinIO</string>
+    <string name="repo_hint_sftp" translatable="false">user@host:/srv/restic-repo</string>
+    <string name="repo_hint_rest" translatable="false">http://host:8000/</string>
+    <string name="repo_hint_s3" translatable="false">s3.us-east-1.amazonaws.com/bucket_name</string>
     <string name="label_path">Путь</string>
     <string name="placeholder_select_directory">Выбери папку…</string>
     <string name="cd_select_folder">Выбрать папку</string>
@@ -231,18 +231,9 @@
     <string name="backup_stage_preparing">[%1$d/%2$d] Подготовка…</string>
     <string name="backup_stage_running">[%1$d/%2$d] Бэкап…</string>
     <string name="backup_stage_finalizing">[%1$d/%2$d] Завершение…</string>
-    <string name="backup_error_no_files_selected">Нет файлов для бэкапа у этих приложений.</string>
     <string name="backup_error_command_failed_with_code">Restic упал с кодом %1$d.</string>
     <string name="backup_warning_metadata_not_saved">Внимание: не удалось сохранить метаданные бэкапа локально.</string>
-    <plurals name="backup_summary_success">
-        <item quantity="one">Создан бэкап %1$d приложения.</item>
-        <item quantity="few">Создан бэкап %1$d приложений.</item>
-        <item quantity="many">Создан бэкап %1$d приложений.</item>
-        <item quantity="other">Создан бэкап %1$d приложений.</item>
-    </plurals>
     <string name="error_fatal_with_message">Критическая ошибка: %1$s</string>
-    <string name="error_no_apps_selected">Приложения не выбраны.</string>
-    <string name="summary_no_apps_selected">Ничего не выбрано.</string>
     <string name="error_no_backup_types_selected">Типы бэкапа не выбраны.</string>
     <string name="summary_no_backup_types_selected">Ни один тип не выбран.</string>
     <string name="error_restic_not_installed">Restic не установлен.</string>
@@ -265,11 +256,9 @@
     <string name="restore_stage_processing_apps">Обработка</string>
     <string name="restore_stage_cleanup">Очистка</string>
     <string name="restore_error_preflight_failed">Предварительные проверки провалены.</string>
-    <string name="restore_error_no_apps_selected">Не выбраны приложения.</string>
     <string name="restore_error_password_not_found">Пароль не найден.</string>
     <string name="restore_error_no_files_found">В снимке нет файлов для этих приложений.</string>
     <string name="restore_error_command_failed">Restic restore упал.</string>
-    <string name="restore_stage_processing_template">[%1$d/%2$d] Обработка</string>
     <string name="restore_failure_install_commit">%1$s: Ошибка коммита установки: %2$s</string>
     <string name="restore_failure_write_apk_splits">%1$s: Ошибка записи сплитов APK.</string>
     <string name="restore_failure_create_install_session">%1$s: Ошибка создания сессии.</string>
@@ -278,18 +267,6 @@
     <string name="restore_failure_permissions_app_not_installed">%1$s: Приложение не установлено, права не применить.</string>
     <string name="restore_failure_permissions_partial">%1$s: Часть прав не восстановилась: %2$s</string>
     <string name="restore_summary_finished_in">Восстановление завершено за %1$s.</string>
-    <plurals name="restore_summary_processed">
-        <item quantity="one">Успешно обработано %1$d приложение.</item>
-        <item quantity="few">Успешно обработано %1$d приложения.</item>
-        <item quantity="many">Успешно обработано %1$d приложений.</item>
-        <item quantity="other">Успешно обработано %1$d приложений.</item>
-    </plurals>
-    <plurals name="restore_summary_failed">
-        <item quantity="one">Не восстановлено: %1$d приложение.</item>
-        <item quantity="few">Не восстановлено: %1$d приложения.</item>
-        <item quantity="many">Не восстановлено: %1$d приложений.</item>
-        <item quantity="other">Не восстановлено: %1$d приложений.</item>
-    </plurals>
     <string name="restore_summary_details">\n\nДетали:\n- %1$s</string>
     <string name="maintenance_task_unlock">Разблокировать</string>
     <string name="maintenance_task_forget">Забыть</string>
@@ -481,4 +458,49 @@
     <string name="repo_warning_metadata_restore_failed">Репозиторий успешно добавлен, но не удалось восстановить его метаданные (расписания, подробные сведения о бэкапах). Обычно это означает, что снимок метаданных отсутствует или репозиторий заблокирован. Чтобы повторить попытку, откройте Настройки → Репозитории, нажмите на меню репозитория и выберите «Восстановить метаданные».</string>
     <string name="screen_tasks">Задачи</string>
     <string name="topbar_tasks">Задачи</string>
+    <string name="run_tasks_custom_directories">Пользовательские директории</string>
+    <string name="run_tasks_custom_directories_subtitle_none">Директории не выбраны</string>
+    <string name="run_tasks_custom_directories_subtitle_count">%1$d директорий выбрано</string>
+    <string name="action_add_directory">Добавить директорию</string>
+    <string name="title_custom_directories">Пользовательские директории</string>
+    <string name="custom_directories_description">Выберите пользовательские директории на устройстве для включения в резервную копию.</string>
+    <string name="error_cannot_backup_repo_to_itself">Нельзя добавить сам репозиторий в качестве пользовательской директории для резервного копирования.</string>
+    <plurals name="backed_up_items_count">
+        <item quantity="few">Резервное копирование (%1$d):</item>
+        <item quantity="many">Создано резервных копий (%1$d):</item>
+        <item quantity="other">Создано резервных копий (%1$d):</item>
+    </plurals>
+    <plurals name="custom_directories_count">
+        <item quantity="few">Пользовательские директории (%1$d):</item>
+        <item quantity="many">Пользовательские директории (%1$d):</item>
+        <item quantity="other">Пользовательские директории (%1$d):</item>
+    </plurals>
+    <plurals name="snapshot_backed_up_custom_directories_count">
+        <item quantity="few">Резервные копии пользовательских директорий (%1$d)</item>
+        <item quantity="many">Резервные копии пользовательских директорий (%1$d)</item>
+        <item quantity="other">Резервные копии пользовательских директорий (%1$d)</item>
+    </plurals>
+    <string name="backup_error_no_files_selected_for_items">Файлы для резервного копирования среди выбранных элементов не найдены.</string>
+    <plurals name="backup_summary_success_items">
+        <item quantity="few">Резервное копирование завершено, элементов: %1$d.</item>
+        <item quantity="many">Создано резервных копий: %1$d эл.</item>
+        <item quantity="other">Создано резервных копий: %1$d эл.</item>
+    </plurals>
+    <string name="error_no_items_selected">Элементы не выбраны.</string>
+    <string name="summary_no_items_selected">Не было выбрано ни одного элемента.</string>
+    <string name="restore_error_no_items_selected">Для восстановления не выбрано ни одного элемента.</string>
+    <string name="restore_stage_processing_template_apps">[%1$d/%2$d] Обработка приложений</string>
+    <string name="restore_stage_processing_template_custom_directories">[%1$d/%2$d] Обработка пользовательских директорий</string>
+    <string name="restore_stage_processing_custom_directories">Обработка пользовательских директорий…</string>
+    <string name="restore_failure_custom_directory">Не удалось восстановить пользовательскую директорию %1$s</string>
+    <plurals name="restore_summary_processed_items">
+        <item quantity="few">Успешно обработано элементов: %1$d.</item>
+        <item quantity="many">Успешно обработано %1$d эл.</item>
+        <item quantity="other">Успешно обработано %1$d эл.</item>
+    </plurals>
+    <plurals name="restore_summary_failed_items">
+        <item quantity="few">Не удалось восстановить %1$d элементов.</item>
+        <item quantity="many">Не удалось восстановить %1$d элемент(а/ов).</item>
+        <item quantity="other">Не удалось восстановить %1$d элемент(а/ов).</item>
+    </plurals>
 </resources>

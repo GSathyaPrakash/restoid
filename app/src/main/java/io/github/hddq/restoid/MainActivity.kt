@@ -67,6 +67,7 @@ import io.github.hddq.restoid.ui.runtasks.RunTasksViewModel
 import io.github.hddq.restoid.ui.runtasks.RunTasksViewModelFactory
 import io.github.hddq.restoid.ui.schedules.AddEditScheduleScreen
 import io.github.hddq.restoid.ui.schedules.ScheduleBackupConfigScreen
+import io.github.hddq.restoid.ui.schedules.ScheduleCustomDirectoriesConfigScreen
 import io.github.hddq.restoid.ui.schedules.ScheduleCheckConfigScreen
 import io.github.hddq.restoid.ui.schedules.ScheduleForgetConfigScreen
 import io.github.hddq.restoid.ui.schedules.SchedulesRoutes
@@ -477,6 +478,7 @@ class MainActivity : FragmentActivity() {
                                     viewModel = vm,
                                     onNavigateBack = { navController.navigateUp() },
                                     onNavigateToBackupConfig = { navController.navigate(SchedulesRoutes.BackupConfig) },
+                                    onNavigateToCustomDirectoriesConfig = { navController.navigate(SchedulesRoutes.CustomDirectoriesConfig) },
                                     onNavigateToForgetConfig = { navController.navigate(SchedulesRoutes.ForgetConfig) },
                                     onNavigateToCheckConfig = { navController.navigate(SchedulesRoutes.CheckConfig) }
                                 )
@@ -510,6 +512,16 @@ class MainActivity : FragmentActivity() {
                                     factory = SchedulesViewModelFactory(app, app.scheduleRepository, app.repositoriesRepository, app.appInfoRepository)
                                 )
                                 ScheduleCheckConfigScreen(viewModel = vm)
+                            }
+                            composable(SchedulesRoutes.CustomDirectoriesConfig) { backStackEntry ->
+                                val parentEntry = remember(backStackEntry) {
+                                    navController.getBackStackEntry(Screen.Schedules.route)
+                                }
+                                val vm: SchedulesViewModel = viewModel(
+                                    viewModelStoreOwner = parentEntry,
+                                    factory = SchedulesViewModelFactory(app, app.scheduleRepository, app.repositoriesRepository, app.appInfoRepository)
+                                )
+                                ScheduleCustomDirectoriesConfigScreen(viewModel = vm)
                             }
                         }
                         navigation(

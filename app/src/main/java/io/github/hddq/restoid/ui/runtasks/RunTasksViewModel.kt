@@ -24,10 +24,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import io.github.hddq.restoid.model.MaintenanceConfig
 
-data class CustomDirectory(
-    val uri: String,
-    val isSelected: Boolean = true
-)
+import io.github.hddq.restoid.model.CustomDirectory
 
 data class RunTasksUiState(
     val apps: List<AppInfo> = emptyList(),

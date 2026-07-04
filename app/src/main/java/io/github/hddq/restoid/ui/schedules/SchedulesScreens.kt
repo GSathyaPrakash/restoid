@@ -190,6 +190,7 @@ fun AddEditScheduleScreen(
     viewModel: SchedulesViewModel,
     onNavigateBack: () -> Unit,
     onNavigateToBackupConfig: () -> Unit,
+    onNavigateToCustomDirectoriesConfig: () -> Unit,
     onNavigateToForgetConfig: () -> Unit,
     onNavigateToCheckConfig: () -> Unit,
     modifier: Modifier = Modifier
@@ -383,6 +384,14 @@ fun AddEditScheduleScreen(
                         checked = state.backupEnabled,
                         onCheckedChange = viewModel::setBackupEnabled,
                         onNavigate = onNavigateToBackupConfig
+                    )
+                    HorizontalDivider(color = MaterialTheme.colorScheme.background)
+                    TaskRow(
+                        title = stringResource(R.string.run_tasks_custom_directories),
+                        subtitle = buildCustomDirectoriesSubtitle(state.customDirectories, context),
+                        checked = state.customDirectoriesBackupEnabled,
+                        onCheckedChange = viewModel::setCustomDirectoriesBackupEnabled,
+                        onNavigate = onNavigateToCustomDirectoriesConfig
                     )
                 }
             }
@@ -596,3 +605,17 @@ private fun ScheduleItem(
     }
 }
 
+
+@Composable
+fun ScheduleCustomDirectoriesConfigScreen(
+    viewModel: SchedulesViewModel,
+    modifier: Modifier = Modifier
+) {
+    val state by viewModel.addEditState.collectAsState()
+    io.github.hddq.restoid.ui.shared.CustomDirectoriesConfigScreen(
+        customDirectories = state.customDirectories,
+        onAddDirectory = viewModel::addCustomDirectory,
+        onToggleDirectory = viewModel::toggleCustomDirectory,
+        modifier = modifier
+    )
+}

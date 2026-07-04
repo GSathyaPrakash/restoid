@@ -214,121 +214,16 @@ fun CheckConfigScreen(
 
 
 
-private fun buildCustomDirectoriesSubtitle(directories: List<CustomDirectory>, context: Context): String {
-    val selectedCount = directories.count { it.isSelected }
-    return if (selectedCount == 0) {
-        context.getString(R.string.run_tasks_custom_directories_subtitle_none)
-    } else {
-        context.getString(R.string.run_tasks_custom_directories_subtitle_count, selectedCount)
-    }
-}
-
 @Composable
 fun CustomDirectoriesConfigScreen(
     viewModel: RunTasksViewModel,
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val context = LocalContext.current
-    val launcher = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenDocumentTree()
-    ) { uri ->
-        if (uri != null) {
-            context.contentResolver.takePersistableUriPermission(
-                uri,
-                android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
-            )
-            viewModel.addCustomDirectory(uri.toString())
-        }
-    }
-
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 80.dp, top = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        item {
-            Text(
-                text = stringResource(R.string.custom_directories_description),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-        }
-
-        if (uiState.customDirectories.isNotEmpty()) {
-            item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
-                ) {
-                    Column {
-                        uiState.customDirectories.forEachIndexed { index, customDir ->
-                            val uri = android.net.Uri.parse(customDir.uri)
-                            val realPath = io.github.hddq.restoid.util.StorageUtils.getPathFromTreeUri(uri)
-                            val displayPath = realPath ?: (uri.lastPathSegment ?: customDir.uri)
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { viewModel.toggleCustomDirectory(customDir.uri) }
-                                    .padding(vertical = 12.dp, horizontal = 16.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Column(modifier = Modifier.weight(1f)) {
-                                    val title = displayPath.substringAfterLast("/")
-                                    Text(
-                                        text = title.ifEmpty { displayPath },
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        style = MaterialTheme.typography.bodyLarge
-                                    )
-                                    Text(
-                                        text = displayPath,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                                Spacer(modifier = Modifier.width(16.dp))
-                                Switch(
-                                    checked = customDir.isSelected,
-                                    onCheckedChange = { viewModel.toggleCustomDirectory(customDir.uri) },
-                                    thumbContent = if (customDir.isSelected) {
-                                        {
-                                            Icon(
-                                                imageVector = androidx.compose.material.icons.Icons.Filled.Check,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(SwitchDefaults.IconSize)
-                                            )
-                                        }
-                                    } else {
-                                        null
-                                    }
-                                )
-                            }
-                            if (index < uiState.customDirectories.size - 1) {
-                                HorizontalDivider(color = MaterialTheme.colorScheme.background)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        item {
-            FilledTonalButton(
-                onClick = { launcher.launch(null) },
-                shape = MaterialTheme.shapes.extraLarge,
-                modifier = Modifier.padding(top = 4.dp)
-            ) {
-                Icon(
-                    imageVector = androidx.compose.material.icons.Icons.Default.Add,
-                    contentDescription = null
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(stringResource(R.string.action_add_directory))
-            }
-        }
-    }
+    io.github.hddq.restoid.ui.shared.CustomDirectoriesConfigScreen(
+        customDirectories = uiState.customDirectories,
+        onAddDirectory = viewModel::addCustomDirectory,
+        onToggleDirectory = viewModel::toggleCustomDirectory,
+        modifier = modifier
+    )
 }

@@ -14,6 +14,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -667,5 +670,125 @@ fun buildCheckSubtitle(config: io.github.hddq.restoid.model.MaintenanceConfig, c
         context.getString(R.string.maintenance_read_all_data)
     } else {
         context.getString(R.string.run_tasks_check_metadata_only)
+    }
+}
+
+fun buildCustomDirectoriesSubtitle(directories: List<io.github.hddq.restoid.model.CustomDirectory>, context: android.content.Context): String {
+    val selectedCount = directories.count { it.isSelected }
+    return if (selectedCount == 0) {
+        context.getString(io.github.hddq.restoid.R.string.run_tasks_custom_directories_subtitle_none)
+    } else {
+        context.getString(io.github.hddq.restoid.R.string.run_tasks_custom_directories_subtitle_count, selectedCount)
+    }
+}
+
+@Composable
+fun CustomDirectoriesConfigScreen(
+    customDirectories: List<io.github.hddq.restoid.model.CustomDirectory>,
+    onAddDirectory: (String) -> Unit,
+    onToggleDirectory: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val launcher = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.OpenDocumentTree()
+    ) { uri ->
+        if (uri != null) {
+            context.contentResolver.takePersistableUriPermission(
+                uri,
+                android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+            onAddDirectory(uri.toString())
+        }
+    }
+
+    androidx.compose.foundation.lazy.LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(start = 16.dp, end = 16.dp, bottom = 80.dp, top = 8.dp),
+        verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(16.dp)
+    ) {
+        item {
+            androidx.compose.material3.Text(
+                text = androidx.compose.ui.res.stringResource(io.github.hddq.restoid.R.string.custom_directories_description),
+                style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
+                color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+        }
+
+        if (customDirectories.isNotEmpty()) {
+            item {
+                androidx.compose.material3.Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = androidx.compose.material3.MaterialTheme.colorScheme.surfaceContainer)
+                ) {
+                    androidx.compose.foundation.layout.Column {
+                        customDirectories.forEachIndexed { index, customDir ->
+                            val uri = android.net.Uri.parse(customDir.uri)
+                            val realPath = io.github.hddq.restoid.util.StorageUtils.getPathFromTreeUri(uri)
+                            val displayPath = realPath ?: (uri.lastPathSegment ?: customDir.uri)
+                            androidx.compose.foundation.layout.Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { onToggleDirectory(customDir.uri) }
+                                    .padding(vertical = 12.dp, horizontal = 16.dp),
+                                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                            ) {
+                                androidx.compose.foundation.layout.Column(modifier = Modifier.weight(1f)) {
+                                    val title = displayPath.substringAfterLast("/")
+                                    androidx.compose.material3.Text(
+                                        text = title.ifEmpty { displayPath },
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        style = androidx.compose.material3.MaterialTheme.typography.bodyLarge
+                                    )
+                                    androidx.compose.material3.Text(
+                                        text = displayPath,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                                        color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                androidx.compose.foundation.layout.Spacer(modifier = Modifier.width(16.dp))
+                                androidx.compose.material3.Switch(
+                                    checked = customDir.isSelected,
+                                    onCheckedChange = { onToggleDirectory(customDir.uri) },
+                                    thumbContent = if (customDir.isSelected) {
+                                        {
+                                            androidx.compose.material3.Icon(
+                                                imageVector = androidx.compose.material.icons.Icons.Filled.Check,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(androidx.compose.material3.SwitchDefaults.IconSize)
+                                            )
+                                        }
+                                    } else {
+                                        null
+                                    }
+                                )
+                            }
+                            if (index < customDirectories.size - 1) {
+                                androidx.compose.material3.HorizontalDivider(color = androidx.compose.material3.MaterialTheme.colorScheme.background)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        item {
+            FilledTonalButton(
+                onClick = { launcher.launch(null) },
+                shape = androidx.compose.material3.MaterialTheme.shapes.extraLarge,
+                modifier = Modifier.padding(top = 4.dp)
+            ) {
+                androidx.compose.material3.Icon(
+                    imageVector = androidx.compose.material.icons.Icons.Default.Add,
+                    contentDescription = null
+                )
+                androidx.compose.foundation.layout.Spacer(modifier = Modifier.width(8.dp))
+                androidx.compose.material3.Text(androidx.compose.ui.res.stringResource(io.github.hddq.restoid.R.string.action_add_directory))
+            }
+        }
     }
 }

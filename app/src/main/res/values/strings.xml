@@ -309,7 +309,7 @@
 
     <string name="backup_error_repository_id_not_found">Repository ID not found. Cannot save metadata.</string>
     <string name="backup_stage_preparing">[%1$d/%2$d] Preparing backup...</string>
-    <string name="backup_stage_running">[%1$d/%2$d] Backing up apps…</string>
+    <string name="backup_stage_running">[%1$d/%2$d] Backing up items…</string>
     <string name="backup_stage_finalizing">[%1$d/%2$d] Finalizing backup…</string>
     <string name="backup_error_no_files_selected_for_items">No files found to back up for the selected items.</string>
     <string name="backup_error_command_failed_with_code">Restic command failed with exit code %1$d.</string>

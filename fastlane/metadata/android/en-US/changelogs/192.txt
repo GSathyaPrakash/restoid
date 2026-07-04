@@ -1,0 +1,6 @@
+* Added custom directories backup and restore
+* Added support for Android 16 live updates notifications
+* Bumped restic to v0.19.0
+* Fixed an intermittent invalid password error when adding a repository
+* Automatically set newly added repositories as the active/selected repository
+* Updated Italian translations (thanks @federicocarboni!)

@@ -163,13 +163,14 @@ class RunTasksViewModel(
         }
 
         val maintenance = _uiState.value.maintenance
+        val hasCustomDirs = _uiState.value.customDirectoriesBackupEnabled && selectedCustomDirs.isNotEmpty()
         val request = RunTasksWorkRequest(
             repositoryKey = selectedRepoKey,
-            backupEnabled = _uiState.value.backupEnabled,
+            backupEnabled = _uiState.value.backupEnabled || hasCustomDirs,
             backupTypes = _uiState.value.backupTypes.toSelection(),
-            selectedPackageNames = _uiState.value.apps.filter { it.isSelected }.map { it.packageName },
-            appBackupTypes = selectedAppBackupTypes().mapValues { it.value.toSelection() },
-            customDirectories = if (_uiState.value.customDirectoriesBackupEnabled) selectedCustomDirs.toList() else emptyList(),
+            selectedPackageNames = if (_uiState.value.backupEnabled) _uiState.value.apps.filter { it.isSelected }.map { it.packageName } else emptyList(),
+            appBackupTypes = if (_uiState.value.backupEnabled) selectedAppBackupTypes().mapValues { it.value.toSelection() } else emptyMap(),
+            customDirectories = if (hasCustomDirs) selectedCustomDirs.toList() else emptyList(),
             unlockRepo = maintenance.unlockRepo,
             forgetSnapshots = maintenance.forgetSnapshots,
             pruneRepo = maintenance.pruneRepo,
@@ -205,7 +206,8 @@ class RunTasksViewModel(
         val state = _uiState.value
         val maintenance = state.maintenance
         val hasMaintenanceTask = maintenance.unlockRepo || maintenance.forgetSnapshots || maintenance.pruneRepo || maintenance.checkRepo
-        if (!state.backupEnabled && !hasMaintenanceTask) {
+        val hasCustomDirs = state.customDirectoriesBackupEnabled && state.customDirectories.any { it.isSelected }
+        if (!state.backupEnabled && !hasCustomDirs && !hasMaintenanceTask) {
             return OperationProgress(
                 isFinished = true,
                 error = application.getString(R.string.maintenance_error_no_tasks),
@@ -214,7 +216,6 @@ class RunTasksViewModel(
         }
 
         if (state.backupEnabled) {
-            val hasCustomDirs = state.customDirectoriesBackupEnabled && state.customDirectories.any { it.isSelected }
             if (state.apps.none { it.isSelected } && !hasCustomDirs) {
                 return OperationProgress(
                     isFinished = true,

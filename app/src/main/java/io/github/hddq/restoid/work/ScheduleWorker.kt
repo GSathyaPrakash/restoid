@@ -39,7 +39,7 @@ class ScheduleWorker(
         // Trigger the run tasks operation
         val workRequest = RunTasksWorkRequest(
             repositoryKey = repoKey,
-            backupEnabled = schedule.config.backupEnabled,
+            backupEnabled = schedule.config.backupEnabled || schedule.config.customDirectories.isNotEmpty(),
             backupTypes = schedule.config.backupTypes,
             selectedPackageNames = schedule.config.selectedPackageNames,
             appBackupTypes = schedule.config.appBackupTypes,

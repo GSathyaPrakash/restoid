@@ -214,13 +214,8 @@ class SchedulesViewModel(
         _addEditState.update { it.copy(showDiscardChangesDialog = false) }
     }
 
-    fun saveSchedule() {
-        val repoKey = _uiState.value.selectedRepoKey ?: return
-        val repository = repositoriesRepository.getRepositoryByKey(repoKey) ?: return
-        val repoId = repository.id ?: return
-
-        val state = _addEditState.value
-        val schedule = Schedule(
+    private fun buildScheduleFromState(state: AddEditScheduleUiState): Schedule {
+        return Schedule(
             id = state.id ?: UUID.randomUUID().toString(),
             name = state.name.ifBlank { "Schedule" },
             intervalHours = state.intervalHours,
@@ -241,8 +236,23 @@ class SchedulesViewModel(
                 keepWeekly = state.maintenance.keepWeekly,
                 keepMonthly = state.maintenance.keepMonthly
             ),
-            triggerConditions = state.triggerConditions
+            triggerConditions = state.triggerConditions,
+            lastRunTimestamp = state.lastRunTimestamp
         )
+    }
+
+    fun runCurrentScheduleNow() {
+        val repoKey = _uiState.value.selectedRepoKey ?: return
+        val schedule = buildScheduleFromState(_addEditState.value)
+        scheduleRepository.runNow(repoKey, schedule)
+    }
+
+    fun saveSchedule() {
+        val repoKey = _uiState.value.selectedRepoKey ?: return
+        val repository = repositoriesRepository.getRepositoryByKey(repoKey) ?: return
+        val repoId = repository.id ?: return
+
+        val schedule = buildScheduleFromState(_addEditState.value)
 
         viewModelScope.launch {
             _addEditState.update { it.copy(isSaving = true) }

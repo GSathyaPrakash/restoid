@@ -23,6 +23,7 @@
     <string name="topbar_restore_snapshot">Restore Snapshot</string>
     <string name="cd_back">Back</string>
     <string name="cd_forget_snapshot">Forget Snapshot</string>
+    <string name="action_run_now">Run now</string>
 
     <string name="fab_run_tasks">Run Tasks</string>
     <string name="fab_add_schedule">Add Schedule</string>

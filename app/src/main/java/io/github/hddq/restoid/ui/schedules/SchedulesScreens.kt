@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.PlayArrow
 import io.github.hddq.restoid.LocalAppBarActions
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.AlertDialog
@@ -207,6 +208,13 @@ fun AddEditScheduleScreen(
     DisposableEffect(state.id) {
         if (state.id != null) {
             appBarActions.value = {
+                IconButton(onClick = { viewModel.runCurrentScheduleNow() }) {
+                    Icon(
+                        Icons.Default.PlayArrow,
+                        contentDescription = stringResource(R.string.action_run_now),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
                 IconButton(onClick = { viewModel.onDeleteScheduleClick() }) {
                     Icon(
                         Icons.Default.Delete,

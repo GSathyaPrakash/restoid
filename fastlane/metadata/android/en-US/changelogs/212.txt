@@ -1,0 +1,2 @@
+* Added rootless support for custom directories backup & restore
+* Fixed a bug where snapshots containing only custom directories failed to restore

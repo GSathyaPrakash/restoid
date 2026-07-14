@@ -56,8 +56,11 @@ class SchedulesViewModel(
     private val application: Application,
     private val scheduleRepository: ScheduleRepository,
     private val repositoriesRepository: RepositoriesRepository,
-    private val appInfoRepository: AppInfoRepository
+    private val appInfoRepository: AppInfoRepository,
+    private val rootRepository: io.github.hddq.restoid.data.RootRepository
 ) : ViewModel() {
+
+    val rootState = rootRepository.rootState
 
     private val _uiState = MutableStateFlow(SchedulesUiState())
     val uiState = _uiState.asStateFlow()

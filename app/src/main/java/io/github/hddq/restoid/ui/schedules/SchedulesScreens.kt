@@ -386,12 +386,16 @@ fun AddEditScheduleScreen(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
                 ) {
+                    val rootState by viewModel.rootState.collectAsState()
+                    val hasRoot = rootState == io.github.hddq.restoid.data.RootState.Granted
+                    
                     TaskRow(
                         title = stringResource(R.string.run_tasks_applications),
-                        subtitle = buildBackupSubtitle(state.apps, state.appBackupTypes, state.backupTypes, context),
-                        checked = state.backupEnabled,
+                        subtitle = if (hasRoot) buildBackupSubtitle(state.apps, state.appBackupTypes, state.backupTypes, context) else stringResource(R.string.root_access_denied),
+                        checked = if (hasRoot) state.backupEnabled else false,
                         onCheckedChange = viewModel::setBackupEnabled,
-                        onNavigate = onNavigateToBackupConfig
+                        onNavigate = if (hasRoot) onNavigateToBackupConfig else null,
+                        enabled = hasRoot
                     )
                     HorizontalDivider(color = MaterialTheme.colorScheme.background)
                     TaskRow(

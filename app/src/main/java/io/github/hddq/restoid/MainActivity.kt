@@ -286,7 +286,7 @@ class MainActivity : FragmentActivity() {
                                         currentDestination?.route == SchedulesRoutes.AddEdit -> {
                                             val entry = navBackStackEntry ?: return@TopAppBar
                                             val parentEntry = try { navController.getBackStackEntry(Screen.Schedules.route) } catch (e: Exception) { entry }
-                                            val vm: SchedulesViewModel = viewModel(viewModelStoreOwner = parentEntry, factory = SchedulesViewModelFactory(app, app.scheduleRepository, app.repositoriesRepository, app.appInfoRepository))
+                                            val vm: SchedulesViewModel = viewModel(viewModelStoreOwner = parentEntry, factory = SchedulesViewModelFactory(app, app.scheduleRepository, app.repositoriesRepository, app.appInfoRepository, app.rootRepository))
                                             val state by vm.addEditState.collectAsState()
                                             if (state.id == null) R.string.topbar_add_schedule else R.string.topbar_edit_schedule
                                         }
@@ -419,7 +419,7 @@ class MainActivity : FragmentActivity() {
                                 }
                                 val viewModel: SchedulesViewModel = viewModel(
                                     viewModelStoreOwner = parentEntry,
-                                    factory = SchedulesViewModelFactory(app, app.scheduleRepository, app.repositoriesRepository, app.appInfoRepository)
+                                    factory = SchedulesViewModelFactory(app, app.scheduleRepository, app.repositoriesRepository, app.appInfoRepository, app.rootRepository)
                                 )
                                 val state by viewModel.addEditState.collectAsState()
                                 if (!state.isSaving) {
@@ -475,7 +475,7 @@ class MainActivity : FragmentActivity() {
                                 }
                                 val vm: SchedulesViewModel = viewModel(
                                     viewModelStoreOwner = parentEntry,
-                                    factory = SchedulesViewModelFactory(app, app.scheduleRepository, app.repositoriesRepository, app.appInfoRepository)
+                                    factory = SchedulesViewModelFactory(app, app.scheduleRepository, app.repositoriesRepository, app.appInfoRepository, app.rootRepository)
                                 )
                                 SchedulesScreen(
                                     viewModel = vm,
@@ -488,7 +488,7 @@ class MainActivity : FragmentActivity() {
                                 }
                                 val vm: SchedulesViewModel = viewModel(
                                     viewModelStoreOwner = parentEntry,
-                                    factory = SchedulesViewModelFactory(app, app.scheduleRepository, app.repositoriesRepository, app.appInfoRepository)
+                                    factory = SchedulesViewModelFactory(app, app.scheduleRepository, app.repositoriesRepository, app.appInfoRepository, app.rootRepository)
                                 )
                                 AddEditScheduleScreen(
                                     viewModel = vm,
@@ -505,7 +505,7 @@ class MainActivity : FragmentActivity() {
                                 }
                                 val vm: SchedulesViewModel = viewModel(
                                     viewModelStoreOwner = parentEntry,
-                                    factory = SchedulesViewModelFactory(app, app.scheduleRepository, app.repositoriesRepository, app.appInfoRepository)
+                                    factory = SchedulesViewModelFactory(app, app.scheduleRepository, app.repositoriesRepository, app.appInfoRepository, app.rootRepository)
                                 )
                                 ScheduleBackupConfigScreen(viewModel = vm)
                             }
@@ -515,7 +515,7 @@ class MainActivity : FragmentActivity() {
                                 }
                                 val vm: SchedulesViewModel = viewModel(
                                     viewModelStoreOwner = parentEntry,
-                                    factory = SchedulesViewModelFactory(app, app.scheduleRepository, app.repositoriesRepository, app.appInfoRepository)
+                                    factory = SchedulesViewModelFactory(app, app.scheduleRepository, app.repositoriesRepository, app.appInfoRepository, app.rootRepository)
                                 )
                                 ScheduleForgetConfigScreen(viewModel = vm)
                             }
@@ -525,7 +525,7 @@ class MainActivity : FragmentActivity() {
                                 }
                                 val vm: SchedulesViewModel = viewModel(
                                     viewModelStoreOwner = parentEntry,
-                                    factory = SchedulesViewModelFactory(app, app.scheduleRepository, app.repositoriesRepository, app.appInfoRepository)
+                                    factory = SchedulesViewModelFactory(app, app.scheduleRepository, app.repositoriesRepository, app.appInfoRepository, app.rootRepository)
                                 )
                                 ScheduleCheckConfigScreen(viewModel = vm)
                             }
@@ -535,7 +535,7 @@ class MainActivity : FragmentActivity() {
                                 }
                                 val vm: SchedulesViewModel = viewModel(
                                     viewModelStoreOwner = parentEntry,
-                                    factory = SchedulesViewModelFactory(app, app.scheduleRepository, app.repositoriesRepository, app.appInfoRepository)
+                                    factory = SchedulesViewModelFactory(app, app.scheduleRepository, app.repositoriesRepository, app.appInfoRepository, app.rootRepository)
                                 )
                                 ScheduleCustomDirectoriesConfigScreen(viewModel = vm)
                             }

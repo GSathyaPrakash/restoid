@@ -235,45 +235,46 @@ class RestoreViewModel(
         val appMetadataMap = metadata?.apps ?: emptyMap()
         val packageNames = appMetadataMap.keys.toList().filter { it != application.packageName }
 
-        if (packageNames.isEmpty()) {
-            _backupDetails.value = emptyList()
-            return
-        }
+        if (packageNames.isNotEmpty()) {
+            val appInfos = appInfoRepository.getAppInfoForPackages(packageNames)
+            val appInfoMap = appInfos.associateBy { it.packageName }
 
-        val appInfos = appInfoRepository.getAppInfoForPackages(packageNames)
-        val appInfoMap = appInfos.associateBy { it.packageName }
+            val details = appMetadataMap.filterKeys { it != application.packageName }.map { (packageName, appMeta) ->
+                val appInfo = appInfoMap[packageName]
+                val items = findBackedUpItems(snapshot, packageName, appMeta.grantedRuntimePermissions.isNotEmpty())
 
-        val details = appMetadataMap.filterKeys { it != application.packageName }.map { (packageName, appMeta) ->
-            val appInfo = appInfoMap[packageName]
-            val items = findBackedUpItems(snapshot, packageName, appMeta.grantedRuntimePermissions.isNotEmpty())
+                val isInstalled = appInfo != null
+                val isDowngrade = if (isInstalled) {
+                    appMeta.versionCode < appInfo.versionCode
+                } else {
+                    false
+                }
 
-            val isInstalled = appInfo != null
-            val isDowngrade = if (isInstalled) {
-                appMeta.versionCode < appInfo.versionCode
-            } else {
-                false
+                val finalAppInfo = appInfo ?: AppInfo(
+                    name = appMeta.appName ?: packageName,
+                    packageName = packageName,
+                    versionName = appMeta.versionName,
+                    versionCode = appMeta.versionCode,
+                    icon = application.packageManager.defaultActivityIcon,
+                    apkPaths = emptyList(),
+                    isSelected = true
+                )
+
+                BackupDetail(finalAppInfo, items, appMeta.versionName, appMeta.versionCode, appMeta.size, isDowngrade, isInstalled)
             }
 
-            val finalAppInfo = appInfo ?: AppInfo(
-                name = appMeta.appName ?: packageName,
-                packageName = packageName,
-                versionName = appMeta.versionName,
-                versionCode = appMeta.versionCode,
-                icon = application.packageManager.defaultActivityIcon,
-                apkPaths = emptyList(),
-                isSelected = true
+            _backupDetails.value = details.sortedWith(
+                compareByDescending<BackupDetail> { it.backupSize ?: 0L }
+                    .thenBy { it.appInfo.name.lowercase() }
             )
-
-            BackupDetail(finalAppInfo, items, appMeta.versionName, appMeta.versionCode, appMeta.size, isDowngrade, isInstalled)
+            _appRestoreTypes.value = details.associate { detail ->
+                detail.appInfo.packageName to (_appRestoreTypes.value[detail.appInfo.packageName] ?: _restoreTypes.value)
+            }
+        } else {
+            _backupDetails.value = emptyList()
+            _appRestoreTypes.value = emptyMap()
         }
 
-        _backupDetails.value = details.sortedWith(
-            compareByDescending<BackupDetail> { it.backupSize ?: 0L }
-                .thenBy { it.appInfo.name.lowercase() }
-        )
-        _appRestoreTypes.value = details.associate { detail ->
-            detail.appInfo.packageName to (_appRestoreTypes.value[detail.appInfo.packageName] ?: _restoreTypes.value)
-        }
         _customDirectories.value = metadata?.customDirectories?.mapValues { true } ?: emptyMap()
         if (_customDirectories.value.isNotEmpty()) {
             _restoreCustomDirectoriesEnabled.value = true
@@ -337,9 +338,7 @@ class RestoreViewModel(
             return
         }
 
-        val selectedCustomDirs = _customDirectories.value.filterValues { it }.keys.toList()
-
-        if (selectedApps.isEmpty() && selectedCustomDirs.isEmpty()) {
+        if (selectedApps.isEmpty() && selectedCustomDirectories.isEmpty()) {
             _restoreProgress.value = OperationProgress(
                 isFinished = true,
                 error = application.getString(R.string.restore_error_no_items_selected),
@@ -414,7 +413,7 @@ class RestoreViewModel(
                 )
             },
             appRestoreTypes = selectedApps.associate { it.appInfo.packageName to effectiveRestoreTypes(it.appInfo.packageName).toSelection() },
-            selectedCustomDirectories = selectedCustomDirs
+            selectedCustomDirectories = selectedCustomDirectories
         )
 
         viewModelScope.launch(Dispatchers.IO) {

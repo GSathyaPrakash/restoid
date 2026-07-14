@@ -1,0 +1,3 @@
+* Added manual schedule trigger button
+* Fixed running tasks with only custom directories selected
+* Fixed tasks finish notification not working when applock is enabled

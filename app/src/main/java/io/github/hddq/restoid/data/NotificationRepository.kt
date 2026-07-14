@@ -64,11 +64,12 @@ class NotificationRepository(private val context: Context) {
     }
 
     private fun createPendingIntent(): PendingIntent {
+        val requestCode = System.currentTimeMillis().toInt()
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             putExtra(EXTRA_OPEN_OPERATION_PROGRESS, true)
         }
-        return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        return PendingIntent.getActivity(context, requestCode, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
     }
 
     fun buildOperationProgressNotification(operationName: String, progress: OperationProgress): Notification {

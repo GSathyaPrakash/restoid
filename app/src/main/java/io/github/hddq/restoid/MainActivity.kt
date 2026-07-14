@@ -63,6 +63,8 @@ import io.github.hddq.restoid.ui.runtasks.CheckConfigScreen
 import io.github.hddq.restoid.ui.runtasks.ForgetConfigScreen
 import io.github.hddq.restoid.ui.runtasks.RunTasksRoutes
 import io.github.hddq.restoid.ui.runtasks.RunTasksScreen
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Box
 import io.github.hddq.restoid.ui.runtasks.RunTasksViewModel
 import io.github.hddq.restoid.ui.runtasks.RunTasksViewModelFactory
 import io.github.hddq.restoid.ui.schedules.AddEditScheduleScreen
@@ -94,7 +96,7 @@ class MainActivity : FragmentActivity() {
         const val APP_UNLOCK_BACKGROUND_TIMEOUT_MS = 60_000L
     }
 
-    private var isAppUnlocked = false
+    private var isAppUnlocked by mutableStateOf(false)
     private var isContentInitialized = false
     private var backgroundedAtElapsedRealtimeMs: Long? = null
     private var isAuthenticationInProgress = false
@@ -117,12 +119,11 @@ class MainActivity : FragmentActivity() {
         registerReceiver(screenOffReceiver, IntentFilter(Intent.ACTION_SCREEN_OFF))
         enableEdgeToEdge()
 
+        launchAppContent(app)
+
         if (app.preferencesRepository.loadRequireAppUnlock() && !isAppUnlocked) {
             authenticateAndLaunch(app)
-            return
         }
-
-        launchAppContent(app)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -141,19 +142,16 @@ class MainActivity : FragmentActivity() {
 
         if (!isAppUnlocked) {
             authenticateAndLaunch(app)
-            return
-        }
-
-        val backgroundedAt = backgroundedAtElapsedRealtimeMs
-        backgroundedAtElapsedRealtimeMs = null
-        if (backgroundedAt == null) {
-            return
-        }
-
-        val timeInBackgroundMs = SystemClock.elapsedRealtime() - backgroundedAt
-        if (timeInBackgroundMs >= APP_UNLOCK_BACKGROUND_TIMEOUT_MS) {
-            isAppUnlocked = false
-            authenticateAndLaunch(app)
+        } else {
+            val backgroundedAt = backgroundedAtElapsedRealtimeMs
+            backgroundedAtElapsedRealtimeMs = null
+            if (backgroundedAt != null) {
+                val timeInBackgroundMs = SystemClock.elapsedRealtime() - backgroundedAt
+                if (timeInBackgroundMs >= APP_UNLOCK_BACKGROUND_TIMEOUT_MS) {
+                    isAppUnlocked = false
+                    authenticateAndLaunch(app)
+                }
+            }
         }
     }
 
@@ -220,9 +218,6 @@ class MainActivity : FragmentActivity() {
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
                     super.onAuthenticationError(errorCode, errString)
                     isAuthenticationInProgress = false
-                    if (!isFinishing && !isDestroyed) {
-                        finish()
-                    }
                 }
             }
         )
@@ -240,7 +235,23 @@ class MainActivity : FragmentActivity() {
 
         setContent {
             RestoidTheme {
-                val navController = rememberNavController()
+                androidx.compose.material3.Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = androidx.compose.material3.MaterialTheme.colorScheme.background
+                ) {
+                    if (!isAppUnlocked && app.preferencesRepository.loadRequireAppUnlock()) {
+                        androidx.compose.foundation.layout.Box(
+                            modifier = androidx.compose.ui.Modifier.fillMaxSize(),
+                            contentAlignment = androidx.compose.ui.Alignment.Center
+                        ) {
+                            androidx.compose.material3.Button(onClick = { authenticateAndLaunch(app) }) {
+                                androidx.compose.material3.Text(getString(R.string.app_unlock_prompt_title))
+                            }
+                        }
+                        return@Surface
+                    }
+
+                    val navController = rememberNavController()
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = navBackStackEntry?.destination
                 val showBottomBar = currentDestination?.route in listOf(Screen.Home.route, SchedulesRoutes.Main, Screen.Settings.route)
@@ -250,8 +261,8 @@ class MainActivity : FragmentActivity() {
                 val homeUiState by homeViewModel.uiState.collectAsState()
                 val appBarActions = remember { mutableStateOf<(@Composable RowScope.() -> Unit)?>(null) }
 
-                if (openOperationProgressOnLaunch) {
-                    androidx.compose.runtime.LaunchedEffect(openOperationProgressOnLaunch) {
+                if (openOperationProgressOnLaunch && isAppUnlocked) {
+                    androidx.compose.runtime.LaunchedEffect(openOperationProgressOnLaunch, isAppUnlocked) {
                         navController.navigate(Screen.OperationProgress.route) {
                             launchSingleTop = true
                         }
@@ -719,6 +730,7 @@ class MainActivity : FragmentActivity() {
                     }
                 }
             }
+                }
             }
         }
     }

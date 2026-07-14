@@ -62,3 +62,9 @@ jobs:
         run: |
           set -euo pipefail
           ./gradlew --no-daemon clean assembleDebug
+
+      - name: Upload debug APKs
+        uses: actions/upload-artifact@v7
+        with:
+          name: restoid-debug-apks
+          path: app/build/outputs/apk/debug/*.apk

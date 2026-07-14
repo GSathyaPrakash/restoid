@@ -40,7 +40,8 @@ class ProgressNotificationHelper(private val context: Context) {
 
     suspend fun startFakeDownload() {
         // Fail-safe check for POST_NOTIFICATIONS permission
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU &&
+            ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             // If you don't have permission, just abort. 
             // Handle permission requests in your Activity/Fragment, not here.
             return

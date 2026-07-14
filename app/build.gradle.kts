@@ -53,7 +53,7 @@ android {
     ndkVersion = "29.0.14206865"
     defaultConfig {
         applicationId = "io.github.hddq.restoid"
-        minSdk = 33
+        minSdk = 29
         targetSdk = 36
         versionCode = 21
         versionName = "0.6.2"

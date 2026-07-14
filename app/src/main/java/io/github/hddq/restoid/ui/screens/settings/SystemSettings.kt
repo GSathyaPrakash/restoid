@@ -102,12 +102,14 @@ fun SystemSettings(
                         runCatching { context.startActivity(intent) }
                     }
                 )
-                HorizontalDivider(color = MaterialTheme.colorScheme.background)
-                NotificationPermissionRow(
-                    state = notificationPermissionState,
-                    onRequestPermission = notificationPermissionLauncher,
-                    onOpenSettings = onOpenSettings
-                )
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                    HorizontalDivider(color = MaterialTheme.colorScheme.background)
+                    NotificationPermissionRow(
+                        state = notificationPermissionState,
+                        onRequestPermission = notificationPermissionLauncher,
+                        onOpenSettings = onOpenSettings
+                    )
+                }
                 HorizontalDivider(color = MaterialTheme.colorScheme.background)
                 BatteryOptimizationRow(
                     disabled = batteryOptimizationDisabled,

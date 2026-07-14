@@ -32,9 +32,9 @@
   ],
   "customDatasources": {
     "go-official": {
-      "defaultRegistryUrlTemplate": "https://go.dev/dl/?mode=json",
+      "defaultRegistryUrlTemplate": "https://go.dev/dl/?mode=json&include=all",
       "transformTemplates": [
-        "{ \"releases\": $[stable = true].{ \"version\": $substring(version, 2), \"digest\": files[os='linux' and arch='amd64' and kind='archive'][0].sha256 } }"
+        "{ \"releases\": $[stable = true].{ \"version\": $substring(version, 2), \"digest\": files[os='linux' and arch='amd64' and kind='archive'].sha256 } }"
       ]
     }
   },

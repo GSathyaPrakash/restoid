@@ -98,16 +98,17 @@ fun RunTasksScreen(
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
                 ) {
                     val rootState by viewModel.rootState.collectAsState()
-                    if (rootState == io.github.hddq.restoid.data.RootState.Granted) {
-                        TaskRow(
-                            title = context.getString(R.string.run_tasks_applications),
-                            subtitle = buildBackupSubtitle(uiState.apps, uiState.appBackupTypes, uiState.backupTypes, context),
-                            checked = uiState.backupEnabled,
-                            onCheckedChange = viewModel::setBackupEnabled,
-                            onNavigate = onNavigateToBackupConfig
-                        )
-                        HorizontalDivider(color = MaterialTheme.colorScheme.background)
-                    }
+                    val hasRoot = rootState == io.github.hddq.restoid.data.RootState.Granted
+                    
+                    TaskRow(
+                        title = context.getString(R.string.run_tasks_applications),
+                        subtitle = if (hasRoot) buildBackupSubtitle(uiState.apps, uiState.appBackupTypes, uiState.backupTypes, context) else context.getString(R.string.root_access_denied),
+                        checked = if (hasRoot) uiState.backupEnabled else false,
+                        onCheckedChange = viewModel::setBackupEnabled,
+                        onNavigate = if (hasRoot) onNavigateToBackupConfig else null,
+                        enabled = hasRoot
+                    )
+                    HorizontalDivider(color = MaterialTheme.colorScheme.background)
                     TaskRow(
                         title = context.getString(R.string.run_tasks_custom_directories),
                         subtitle = buildCustomDirectoriesSubtitle(uiState.customDirectories, context),

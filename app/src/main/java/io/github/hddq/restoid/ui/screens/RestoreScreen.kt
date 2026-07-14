@@ -94,17 +94,18 @@ fun RestoreScreen(
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
                 ) {
                     val rootState by viewModel.rootState.collectAsState()
+                    val hasRoot = rootState == io.github.hddq.restoid.data.RootState.Granted
                     val selectableBackupDetails = backupDetails.filter { allowDowngrade || !it.isDowngrade }
-                    if (rootState == io.github.hddq.restoid.data.RootState.Granted) {
-                        TaskRow(
-                            title = stringResource(R.string.run_tasks_applications),
-                            subtitle = buildSelectedRestoreTypesSummary(selectableBackupDetails, appRestoreTypes, restoreTypes, context),
-                            checked = restoreAppsEnabled,
-                            onCheckedChange = viewModel::setRestoreAppsEnabled,
-                            onNavigate = onNavigateToAppsConfig
-                        )
-                        HorizontalDivider(color = MaterialTheme.colorScheme.background)
-                    }
+                    
+                    TaskRow(
+                        title = stringResource(R.string.run_tasks_applications),
+                        subtitle = if (hasRoot) buildSelectedRestoreTypesSummary(selectableBackupDetails, appRestoreTypes, restoreTypes, context) else stringResource(R.string.root_access_denied),
+                        checked = if (hasRoot) restoreAppsEnabled else false,
+                        onCheckedChange = viewModel::setRestoreAppsEnabled,
+                        onNavigate = if (hasRoot) onNavigateToAppsConfig else null,
+                        enabled = hasRoot
+                    )
+                    HorizontalDivider(color = MaterialTheme.colorScheme.background)
                     
                     val customDirsList = customDirectories.map { io.github.hddq.restoid.model.CustomDirectory(it.key, it.value) }
                     TaskRow(

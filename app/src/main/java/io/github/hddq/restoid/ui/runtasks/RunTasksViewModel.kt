@@ -45,6 +45,7 @@ sealed interface RunTasksUiEvent {
 
 class RunTasksViewModel(
     private val application: Application,
+    private val rootRepository: io.github.hddq.restoid.data.RootRepository,
     private val repositoriesRepository: RepositoriesRepository,
     private val resticBinaryManager: ResticBinaryManager,
     private val appInfoRepository: io.github.hddq.restoid.data.AppInfoRepository,
@@ -67,6 +68,8 @@ class RunTasksViewModel(
         )
     )
     val uiState = _uiState.asStateFlow()
+
+    val rootState = rootRepository.rootState
 
     private val _operationBlocked = MutableStateFlow(false)
     val operationBlocked = _operationBlocked.asStateFlow()

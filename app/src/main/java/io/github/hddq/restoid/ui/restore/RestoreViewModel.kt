@@ -78,6 +78,7 @@ sealed interface RestoreUiEvent {
 class RestoreViewModel(
     private val application: Application,
     private val repositoriesRepository: RepositoriesRepository,
+    private val rootRepository: io.github.hddq.restoid.data.RootRepository,
     private val resticBinaryManager: ResticBinaryManager,
     private val resticRepository: ResticRepository,
     private val appInfoRepository: AppInfoRepository,
@@ -129,6 +130,8 @@ class RestoreViewModel(
     val operationBlocked = _operationBlocked.asStateFlow()
     private val _uiEvents = MutableSharedFlow<RestoreUiEvent>(extraBufferCapacity = 1)
     val uiEvents: SharedFlow<RestoreUiEvent> = _uiEvents.asSharedFlow()
+
+    val rootState = rootRepository.rootState
 
     init {
         _restoreTypes.value = preferencesRepository.loadRestoreTypes()

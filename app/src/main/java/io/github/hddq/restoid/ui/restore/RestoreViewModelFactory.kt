@@ -9,6 +9,7 @@ import io.github.hddq.restoid.work.OperationWorkRepository
 class RestoreViewModelFactory(
     private val application: Application,
     private val repositoriesRepository: RepositoriesRepository,
+    private val rootRepository: io.github.hddq.restoid.data.RootRepository,
     private val resticBinaryManager: ResticBinaryManager,
     private val resticRepository: ResticRepository,
     private val appInfoRepository: AppInfoRepository,
@@ -23,6 +24,7 @@ class RestoreViewModelFactory(
             return RestoreViewModel(
                 application,
                 repositoriesRepository,
+                rootRepository,
                 resticBinaryManager,
                 resticRepository,
                 appInfoRepository,

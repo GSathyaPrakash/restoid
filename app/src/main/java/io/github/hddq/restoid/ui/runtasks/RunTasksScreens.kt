@@ -97,14 +97,17 @@ fun RunTasksScreen(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
                 ) {
-                    TaskRow(
-                        title = context.getString(R.string.run_tasks_applications),
-                        subtitle = buildBackupSubtitle(uiState.apps, uiState.appBackupTypes, uiState.backupTypes, context),
-                        checked = uiState.backupEnabled,
-                        onCheckedChange = viewModel::setBackupEnabled,
-                        onNavigate = onNavigateToBackupConfig
-                    )
-                    HorizontalDivider(color = MaterialTheme.colorScheme.background)
+                    val rootState by viewModel.rootState.collectAsState()
+                    if (rootState == io.github.hddq.restoid.data.RootState.Granted) {
+                        TaskRow(
+                            title = context.getString(R.string.run_tasks_applications),
+                            subtitle = buildBackupSubtitle(uiState.apps, uiState.appBackupTypes, uiState.backupTypes, context),
+                            checked = uiState.backupEnabled,
+                            onCheckedChange = viewModel::setBackupEnabled,
+                            onNavigate = onNavigateToBackupConfig
+                        )
+                        HorizontalDivider(color = MaterialTheme.colorScheme.background)
+                    }
                     TaskRow(
                         title = context.getString(R.string.run_tasks_custom_directories),
                         subtitle = buildCustomDirectoriesSubtitle(uiState.customDirectories, context),
@@ -168,6 +171,14 @@ fun BackupConfigScreen(
     viewModel: RunTasksViewModel,
     modifier: Modifier = Modifier
 ) {
+    val rootState by viewModel.rootState.collectAsState()
+    if (rootState != io.github.hddq.restoid.data.RootState.Granted) {
+        Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(stringResource(R.string.root_access_denied))
+        }
+        return
+    }
+
     val uiState by viewModel.uiState.collectAsState()
     io.github.hddq.restoid.ui.shared.BackupConfigScreen(
         isLoadingApps = uiState.isLoadingApps,

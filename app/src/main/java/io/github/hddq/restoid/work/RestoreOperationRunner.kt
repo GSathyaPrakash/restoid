@@ -85,6 +85,10 @@ class RestoreOperationRunner(
                 throw IllegalStateException(context.getString(R.string.restore_error_no_items_selected))
             }
 
+            if (selectedAppPackages.isNotEmpty() && !Shell.getShell().isRoot) {
+                throw IllegalStateException(context.getString(R.string.root_access_denied))
+            }
+
             val currentSnapshot = findSnapshot(request)
                 ?: throw IllegalStateException(context.getString(R.string.error_snapshot_not_found))
 
@@ -146,7 +150,7 @@ class RestoreOperationRunner(
                 val command = buildString {
                     if (envPrefix.isNotEmpty()) append(envPrefix).append(' ')
                     append("RESTIC_PASSWORD_FILE=").append(shellQuote(passwordFile.absolutePath)).append(' ')
-                    append("RESTIC_CACHE_DIR=").append(shellQuote(File(context.cacheDir, "restic").absolutePath)).append(' ')
+                    append("RESTIC_CACHE_DIR=").append(shellQuote(File(context.cacheDir, if (com.topjohnwu.superuser.Shell.getShell().isRoot) "restic" else "restic-user").absolutePath)).append(' ')
                     append(shellQuote(resticState.path)).append(' ')
                     append("--retry-lock 5s ")
                     if (resticOptionFlags.isNotEmpty()) append(resticOptionFlags).append(' ')

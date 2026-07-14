@@ -75,7 +75,7 @@ class ResticExecutor(
                 val fullCommand = buildString {
                     if (envPrefix.isNotEmpty()) append(envPrefix).append(' ')
                     append("RESTIC_PASSWORD_FILE=").append(shellQuote(passwordFile.absolutePath)).append(' ')
-                    append("RESTIC_CACHE_DIR=").append(shellQuote(File(context.cacheDir, "restic").absolutePath)).append(' ')
+                    append("RESTIC_CACHE_DIR=").append(shellQuote(File(context.cacheDir, if (com.topjohnwu.superuser.Shell.getShell().isRoot) "restic" else "restic-user").absolutePath)).append(' ')
                     append(shellQuote(resticPath)).append(' ')
                     append("--retry-lock 5s ")
                     if (optionFlags.isNotEmpty()) append(optionFlags).append(' ')

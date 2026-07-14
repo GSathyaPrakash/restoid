@@ -253,6 +253,10 @@
     <string name="checking_for_root">Checking for root…</string>
     <string name="root_access_granted">Root access granted</string>
 
+    <string name="storage_permission_enabled">All files access granted</string>
+    <string name="storage_permission_disabled">All files access required</string>
+    <string name="storage_permission_description">Required to back up custom directories without root access.</string>
+
     <string name="dependencies_title">Dependencies</string>
     <string name="about_title">About</string>
     <string name="version_label">Version</string>

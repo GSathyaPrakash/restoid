@@ -93,15 +93,18 @@ fun RestoreScreen(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
                 ) {
+                    val rootState by viewModel.rootState.collectAsState()
                     val selectableBackupDetails = backupDetails.filter { allowDowngrade || !it.isDowngrade }
-                    TaskRow(
-                        title = stringResource(R.string.run_tasks_applications),
-                        subtitle = buildSelectedRestoreTypesSummary(selectableBackupDetails, appRestoreTypes, restoreTypes, context),
-                        checked = restoreAppsEnabled,
-                        onCheckedChange = viewModel::setRestoreAppsEnabled,
-                        onNavigate = onNavigateToAppsConfig
-                    )
-                    HorizontalDivider(color = MaterialTheme.colorScheme.background)
+                    if (rootState == io.github.hddq.restoid.data.RootState.Granted) {
+                        TaskRow(
+                            title = stringResource(R.string.run_tasks_applications),
+                            subtitle = buildSelectedRestoreTypesSummary(selectableBackupDetails, appRestoreTypes, restoreTypes, context),
+                            checked = restoreAppsEnabled,
+                            onCheckedChange = viewModel::setRestoreAppsEnabled,
+                            onNavigate = onNavigateToAppsConfig
+                        )
+                        HorizontalDivider(color = MaterialTheme.colorScheme.background)
+                    }
                     
                     val customDirsList = customDirectories.map { io.github.hddq.restoid.model.CustomDirectory(it.key, it.value) }
                     TaskRow(
@@ -140,6 +143,14 @@ fun RestoreAppsConfigScreen(
     val allowDowngrade by viewModel.allowDowngrade.collectAsState()
     val restoreTypes by viewModel.restoreTypes.collectAsState()
     val appRestoreTypes by viewModel.appRestoreTypes.collectAsState()
+    val rootState by viewModel.rootState.collectAsState()
+
+    if (rootState != io.github.hddq.restoid.data.RootState.Granted) {
+        Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(stringResource(R.string.root_access_denied))
+        }
+        return
+    }
     
     val selectableBackupDetails = backupDetails.filter { allowDowngrade || !it.isDowngrade }
     val isAllSelected = selectableBackupDetails.isNotEmpty() && selectableBackupDetails.all { it.appInfo.isSelected }

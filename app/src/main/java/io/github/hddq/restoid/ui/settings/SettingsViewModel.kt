@@ -65,7 +65,8 @@ class SettingsViewModel(
     private val resticRepository: ResticRepository,
     private val repositoriesRepository: RepositoriesRepository,
     private val notificationRepository: NotificationRepository,
-    private val preferencesRepository: PreferencesRepository
+    private val preferencesRepository: PreferencesRepository,
+    private val storagePermissionRepository: StoragePermissionRepository
 ) : ViewModel() {
 
     val rootState = rootRepository.rootState
@@ -74,6 +75,7 @@ class SettingsViewModel(
     val repositories = repositoriesRepository.repositories
     val selectedRepository = repositoriesRepository.selectedRepository
     val notificationPermissionState = notificationRepository.permissionState
+    val storagePermissionState = storagePermissionRepository.permissionState
 
     private val _addRepoUiState = MutableStateFlow(AddRepoUiState())
     val addRepoUiState = _addRepoUiState.asStateFlow()
@@ -123,6 +125,7 @@ class SettingsViewModel(
             refreshRootDependentState()
             refreshBatteryOptimizationStatus()
             checkNotificationPermission()
+            checkStoragePermission()
             refreshUsageStatsPermissionStatus()
         }
     }
@@ -261,6 +264,7 @@ class SettingsViewModel(
 
     fun resetChangePasswordState() { _changePasswordState.value = ChangePasswordState.Idle }
     fun checkNotificationPermission() = notificationRepository.checkPermissionStatus()
+    fun checkStoragePermission() = storagePermissionRepository.checkPermissionStatus()
 
     fun onRequireAppUnlockChanged(required: Boolean) {
         _requireAppUnlock.value = required

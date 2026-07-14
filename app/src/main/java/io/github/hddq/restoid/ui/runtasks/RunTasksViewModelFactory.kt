@@ -11,6 +11,7 @@ import io.github.hddq.restoid.work.OperationWorkRepository
 
 class RunTasksViewModelFactory(
     private val application: Application,
+    private val rootRepository: io.github.hddq.restoid.data.RootRepository,
     private val repositoriesRepository: RepositoriesRepository,
     private val resticBinaryManager: ResticBinaryManager,
     private val appInfoRepository: AppInfoRepository,
@@ -22,6 +23,7 @@ class RunTasksViewModelFactory(
             @Suppress("UNCHECKED_CAST")
             return RunTasksViewModel(
                 application = application,
+                rootRepository = rootRepository,
                 repositoriesRepository = repositoriesRepository,
                 resticBinaryManager = resticBinaryManager,
                 appInfoRepository = appInfoRepository,

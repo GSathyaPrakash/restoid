@@ -156,7 +156,7 @@ class BackupOperationRunner(
             val command = buildString {
                 if (envPrefix.isNotEmpty()) append(envPrefix).append(' ')
                 append("RESTIC_PASSWORD_FILE=").append(shellQuote(passwordFile.absolutePath)).append(' ')
-                append("RESTIC_CACHE_DIR=").append(shellQuote(File(context.cacheDir, "restic").absolutePath)).append(' ')
+                append("RESTIC_CACHE_DIR=").append(shellQuote(File(context.cacheDir, if (com.topjohnwu.superuser.Shell.getShell().isRoot) "restic" else "restic-user").absolutePath)).append(' ')
                 append(shellQuote(resticState.path)).append(' ')
                 append("--retry-lock 5s ")
                 if (resticOptionFlags.isNotEmpty()) append(resticOptionFlags).append(' ')
@@ -387,6 +387,14 @@ class BackupOperationRunner(
                 isFinished = true,
                 error = context.getString(R.string.error_no_items_selected),
                 finalSummary = context.getString(R.string.summary_no_items_selected)
+            )
+        }
+
+        if (selectedApps.isNotEmpty() && !Shell.getShell().isRoot) {
+            return OperationProgress(
+                isFinished = true,
+                error = context.getString(R.string.root_access_denied),
+                finalSummary = context.getString(R.string.root_access_denied)
             )
         }
 

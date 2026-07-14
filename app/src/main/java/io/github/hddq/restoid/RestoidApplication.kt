@@ -16,6 +16,7 @@ class RestoidApplication : Application() {
 
     lateinit var rootRepository: RootRepository
         private set
+    lateinit var storagePermissionRepository: io.github.hddq.restoid.data.StoragePermissionRepository
     lateinit var resticBinaryManager: ResticBinaryManager
         private set
     lateinit var resticExecutor: ResticExecutor
@@ -51,13 +52,11 @@ class RestoidApplication : Application() {
         super.onCreate()
 
         Shell.enableVerboseLogging = BuildConfig.DEBUG
-        Shell.setDefaultBuilder(
-            Shell.Builder.create()
-                .setFlags(Shell.FLAG_MOUNT_MASTER)
-        )
+        Shell.enableVerboseLogging = BuildConfig.DEBUG
 
         // Initialize specialized components
         rootRepository = RootRepository()
+        storagePermissionRepository = StoragePermissionRepository(applicationContext)
         resticBinaryManager = ResticBinaryManager(applicationContext)
         resticExecutor = ResticExecutor(applicationContext, resticBinaryManager)
         resticRepository = ResticRepository(applicationContext, resticExecutor)
@@ -90,6 +89,7 @@ class RestoidApplication : Application() {
             repositoriesRepository.loadRepositories()
             scheduleRepository.reconcileAllSchedules()
             notificationRepository.checkPermissionStatus()
+            storagePermissionRepository.checkPermissionStatus()
         }
 
         applicationScope.launch(Dispatchers.IO) {

@@ -17,7 +17,8 @@ class SettingsViewModelFactory(
     private val resticRepository: ResticRepository,
     private val repositoriesRepository: RepositoriesRepository,
     private val notificationRepository: NotificationRepository,
-    private val preferencesRepository: PreferencesRepository
+    private val preferencesRepository: PreferencesRepository,
+    private val storagePermissionRepository: io.github.hddq.restoid.data.StoragePermissionRepository
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(SettingsViewModel::class.java)) {
@@ -29,7 +30,8 @@ class SettingsViewModelFactory(
                 resticRepository,
                 repositoriesRepository,
                 notificationRepository,
-                preferencesRepository
+                preferencesRepository,
+                storagePermissionRepository
             ) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")

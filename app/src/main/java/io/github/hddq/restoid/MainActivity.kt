@@ -360,6 +360,7 @@ class MainActivity : FragmentActivity() {
                                     viewModelStoreOwner = parentEntry,
                                     factory = RunTasksViewModelFactory(
                                         app,
+                                        app.rootRepository,
                                         app.repositoriesRepository,
                                         app.resticBinaryManager,
                                         app.appInfoRepository,
@@ -392,6 +393,7 @@ class MainActivity : FragmentActivity() {
                                     factory = RestoreViewModelFactory(
                                         app,
                                         app.repositoriesRepository,
+                                        app.rootRepository,
                                         app.resticBinaryManager,
                                         app.resticRepository,
                                         app.appInfoRepository,
@@ -459,7 +461,7 @@ class MainActivity : FragmentActivity() {
                         }
                         composable(Screen.Settings.route) {
                             val vm: SettingsViewModel = viewModel(
-                                factory = SettingsViewModelFactory(app, app.rootRepository, app.resticBinaryManager, app.resticRepository, app.repositoriesRepository, app.notificationRepository, app.preferencesRepository)
+                                factory = SettingsViewModelFactory(app, app.rootRepository, app.resticBinaryManager, app.resticRepository, app.repositoriesRepository, app.notificationRepository, app.preferencesRepository, app.storagePermissionRepository)
                             )
                             SettingsScreen(viewModel = vm, onNavigateToLicenses = { navController.navigate(Screen.Licenses.route) })
                         }
@@ -550,6 +552,7 @@ class MainActivity : FragmentActivity() {
                                     viewModelStoreOwner = parentEntry,
                                     factory = RunTasksViewModelFactory(
                                         app,
+                                        app.rootRepository,
                                         app.repositoriesRepository,
                                         app.resticBinaryManager,
                                         app.appInfoRepository,
@@ -576,6 +579,7 @@ class MainActivity : FragmentActivity() {
                                     viewModelStoreOwner = parentEntry,
                                     factory = RunTasksViewModelFactory(
                                         app,
+                                        app.rootRepository,
                                         app.repositoriesRepository,
                                         app.resticBinaryManager,
                                         app.appInfoRepository,
@@ -593,6 +597,7 @@ class MainActivity : FragmentActivity() {
                                     viewModelStoreOwner = parentEntry,
                                     factory = RunTasksViewModelFactory(
                                         app,
+                                        app.rootRepository,
                                         app.repositoriesRepository,
                                         app.resticBinaryManager,
                                         app.appInfoRepository,
@@ -610,6 +615,7 @@ class MainActivity : FragmentActivity() {
                                     viewModelStoreOwner = parentEntry,
                                     factory = RunTasksViewModelFactory(
                                         app,
+                                        app.rootRepository,
                                         app.repositoriesRepository,
                                         app.resticBinaryManager,
                                         app.appInfoRepository,
@@ -627,6 +633,7 @@ class MainActivity : FragmentActivity() {
                                     viewModelStoreOwner = parentEntry,
                                     factory = RunTasksViewModelFactory(
                                         app,
+                                        app.rootRepository,
                                         app.repositoriesRepository,
                                         app.resticBinaryManager,
                                         app.appInfoRepository,
@@ -664,6 +671,7 @@ class MainActivity : FragmentActivity() {
                                     factory = RestoreViewModelFactory(
                                         app,
                                         app.repositoriesRepository,
+                                        app.rootRepository,
                                         app.resticBinaryManager,
                                         app.resticRepository,
                                         app.appInfoRepository,
@@ -690,6 +698,7 @@ class MainActivity : FragmentActivity() {
                                     factory = RestoreViewModelFactory(
                                         app,
                                         app.repositoriesRepository,
+                                        app.rootRepository,
                                         app.resticBinaryManager,
                                         app.resticRepository,
                                         app.appInfoRepository,
@@ -711,6 +720,7 @@ class MainActivity : FragmentActivity() {
                                     factory = RestoreViewModelFactory(
                                         app,
                                         app.repositoriesRepository,
+                                        app.rootRepository,
                                         app.resticBinaryManager,
                                         app.resticRepository,
                                         app.appInfoRepository,

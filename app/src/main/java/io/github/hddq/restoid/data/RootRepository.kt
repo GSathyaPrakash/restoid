@@ -20,7 +20,21 @@ class RootRepository {
         _rootState.value = RootState.Checking
         val hasRoot = withContext(Dispatchers.IO) {
             runCatching { Shell.getCachedShell()?.close() }
-            Shell.getShell().isRoot
+            
+            Shell.setDefaultBuilder(
+                Shell.Builder.create().setFlags(Shell.FLAG_MOUNT_MASTER)
+            )
+            val isRoot = Shell.getShell().isRoot
+            
+            if (!isRoot) {
+                runCatching { Shell.getCachedShell()?.close() }
+                Shell.setDefaultBuilder(
+                    Shell.Builder.create().setFlags(Shell.FLAG_NON_ROOT_SHELL)
+                )
+                Shell.getShell() // Re-initialize the non-root shell correctly
+            }
+            
+            isRoot
         }
         _rootState.value = if (hasRoot) RootState.Granted else RootState.Denied
     }

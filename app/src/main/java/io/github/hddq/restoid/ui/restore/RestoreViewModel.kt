@@ -317,7 +317,9 @@ class RestoreViewModel(
         val selectedRepository = selectedRepoKey?.let { repositoriesRepository.getRepositoryByKey(it) }
         val selectedRepoPath = selectedRepository?.path
         val currentSnapshot = _snapshot.value
-        val selectedApps = if (_restoreAppsEnabled.value) {
+        val hasRoot = rootState.value == io.github.hddq.restoid.data.RootState.Granted
+        
+        val selectedApps = if (_restoreAppsEnabled.value && hasRoot) {
             _backupDetails.value.filter { it.appInfo.isSelected && (_allowDowngrade.value || !it.isDowngrade) }
         } else {
             emptyList()

@@ -54,7 +54,10 @@ class RestoidApplication : Application() {
         super.onCreate()
 
         Shell.enableVerboseLogging = BuildConfig.DEBUG
-        Shell.enableVerboseLogging = BuildConfig.DEBUG
+        
+        com.topjohnwu.superuser.Shell.setDefaultBuilder(
+            com.topjohnwu.superuser.Shell.Builder.create().setFlags(com.topjohnwu.superuser.Shell.FLAG_MOUNT_MASTER)
+        )
 
         // Initialize specialized components
         rootRepository = RootRepository()

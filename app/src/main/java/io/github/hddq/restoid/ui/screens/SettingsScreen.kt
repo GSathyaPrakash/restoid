@@ -81,6 +81,11 @@ fun SettingsScreen(
         onResult = { viewModel.checkNotificationPermission() }
     )
 
+    val localNetworkPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { viewModel.updateLocalNetworkPermissionStatus() }
+    )
+
     if (showMetadataWarning != null) {
         AlertDialog(
             onDismissRequest = { viewModel.dismissMetadataWarning() },
@@ -134,7 +139,8 @@ fun SettingsScreen(
         item {
             SystemSettings(
                 viewModel = viewModel,
-                notificationPermissionLauncher = { notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS) },
+                notificationPermissionLauncher = { notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS) },
+                localNetworkPermissionLauncher = { localNetworkPermissionLauncher.launch("android.permission.ACCESS_LOCAL_NETWORK") },
                 onOpenSettings = {
                     val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
                         putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)

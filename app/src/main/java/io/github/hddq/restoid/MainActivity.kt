@@ -461,7 +461,17 @@ class MainActivity : FragmentActivity() {
                         }
                         composable(Screen.Settings.route) {
                             val vm: SettingsViewModel = viewModel(
-                                factory = SettingsViewModelFactory(app, app.rootRepository, app.resticBinaryManager, app.resticRepository, app.repositoriesRepository, app.notificationRepository, app.preferencesRepository, app.storagePermissionRepository)
+                                factory = SettingsViewModelFactory(
+                                    applicationContext,
+                                    app.rootRepository,
+                                    app.resticBinaryManager,
+                                    app.resticRepository,
+                                    app.repositoriesRepository,
+                                    app.notificationRepository,
+                                    app.preferencesRepository,
+                                    app.storagePermissionRepository,
+                                    app.localNetworkPermissionRepository
+                                )
                             )
                             SettingsScreen(viewModel = vm, onNavigateToLicenses = { navController.navigate(Screen.Licenses.route) })
                         }

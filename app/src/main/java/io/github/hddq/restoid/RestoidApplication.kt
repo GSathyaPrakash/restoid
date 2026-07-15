@@ -17,6 +17,8 @@ class RestoidApplication : Application() {
     lateinit var rootRepository: RootRepository
         private set
     lateinit var storagePermissionRepository: io.github.hddq.restoid.data.StoragePermissionRepository
+    lateinit var localNetworkPermissionRepository: LocalNetworkPermissionRepository
+        private set
     lateinit var resticBinaryManager: ResticBinaryManager
         private set
     lateinit var resticExecutor: ResticExecutor
@@ -57,6 +59,7 @@ class RestoidApplication : Application() {
         // Initialize specialized components
         rootRepository = RootRepository()
         storagePermissionRepository = StoragePermissionRepository(applicationContext)
+        localNetworkPermissionRepository = LocalNetworkPermissionRepository(applicationContext)
         resticBinaryManager = ResticBinaryManager(applicationContext)
         resticExecutor = ResticExecutor(applicationContext, resticBinaryManager)
         resticRepository = ResticRepository(applicationContext, resticExecutor)
@@ -90,6 +93,7 @@ class RestoidApplication : Application() {
             scheduleRepository.reconcileAllSchedules()
             notificationRepository.checkPermissionStatus()
             storagePermissionRepository.checkPermissionStatus()
+            localNetworkPermissionRepository.checkPermissionStatus()
         }
 
         applicationScope.launch(Dispatchers.IO) {

@@ -50,6 +50,9 @@
     <string name="backup_type_obb_data_desc">Opaque Binary Blob files (/storage/emulated/&lt;id&gt;/Android/obb)</string>
     <string name="backup_type_media_data">Media Data</string>
     <string name="backup_type_media_data_desc">App media files (/storage/emulated/&lt;id&gt;/Android/media)</string>
+    <string name="settings_system_permission_storage">Storage Access</string>
+    <string name="settings_system_permission_local_network">Local Network Access</string>
+    <string name="settings_system_permission_granted">Granted</string>
     <string name="backup_type_permissions">Permissions</string>
     <string name="backup_type_permissions_desc">Granted runtime permissions</string>
     <string name="apps_title">Apps</string>

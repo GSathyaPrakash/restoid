@@ -348,7 +348,23 @@ class ResticRepository(
 
             withContext(Dispatchers.IO) {
                 val result = Shell.cmd(command).exec()
-                val isSuccess = result.isSuccess || result.code == 3
+                var isOnlySafeErrors = true
+                for (line in result.out) {
+                    try {
+                        val json = org.json.JSONObject(line)
+                        if (json.optString("message_type") == "error") {
+                            val item = json.optString("item")
+                            val message = json.optJSONObject("error")?.optString("message") ?: ""
+                            val isSafe = item == "/data/user/0" && message.contains("user.serial")
+                            if (!isSafe) {
+                                isOnlySafeErrors = false
+                                break
+                            }
+                        }
+                    } catch (e: Exception) {}
+                }
+                
+                val isSuccess = result.isSuccess || (result.code == 3 && isOnlySafeErrors)
                 if (!isSuccess) {
                     Log.e("ResticRepo", "Metadata backup failed: ${result.err.joinToString("\n")}")
                 } else {

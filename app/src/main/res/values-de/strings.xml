@@ -473,4 +473,11 @@
         <item quantity="one">Wiederherstellung von %1$d Element fehlgeschlagen.</item>
         <item quantity="other">Wiederherstellung von %1$d Elementen fehlgeschlagen.</item>
     </plurals>
+    <string name="action_run_now">Jetzt ausführen</string>
+    <string name="storage_permission_enabled">Zugriff auf alle Dateien gewährt</string>
+    <string name="storage_permission_disabled">Zugriff auf alle Dateien erforderlich</string>
+    <string name="storage_permission_description">Erforderlich für die Sicherung benutzerdefinierter Verzeichnisse ohne Root-Zugriff.</string>
+    <string name="settings_system_permission_storage">Speicherzugriff</string>
+    <string name="settings_system_permission_local_network">Zugriff auf lokales Netzwerk</string>
+    <string name="local_network_permission_enabled">Zugriff auf lokales Netzwerk gewährt</string>
 </resources>

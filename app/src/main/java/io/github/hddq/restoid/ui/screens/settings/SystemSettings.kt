@@ -316,15 +316,12 @@ private fun LocalNetworkPermissionRow(
             )
             Column {
                 Text(
-                    text = stringResource(R.string.settings_system_permission_local_network)
+                    text = if (granted) {
+                        stringResource(R.string.local_network_permission_enabled)
+                    } else {
+                        stringResource(R.string.settings_system_permission_local_network)
+                    }
                 )
-                if (granted) {
-                    Text(
-                        text = stringResource(R.string.settings_system_permission_granted),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
             }
         }
         if (!granted) {

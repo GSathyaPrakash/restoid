@@ -191,7 +191,8 @@ class BackupOperationRunner(
             val result = Shell.cmd(command).to(stdoutCallback, stderr).exec()
             throwIfCancelled()
 
-            if (!result.isSuccess || snapshotId == null) {
+            val isResticSuccess = result.isSuccess || result.code == 3
+            if (!isResticSuccess || snapshotId == null) {
                 val errorOutput = stderr.joinToString("\n")
                 throw IllegalStateException(
                     if (errorOutput.isEmpty()) {

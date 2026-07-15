@@ -348,7 +348,8 @@ class ResticRepository(
 
             withContext(Dispatchers.IO) {
                 val result = Shell.cmd(command).exec()
-                if (!result.isSuccess) {
+                val isSuccess = result.isSuccess || result.code == 3
+                if (!isSuccess) {
                     Log.e("ResticRepo", "Metadata backup failed: ${result.err.joinToString("\n")}")
                 } else {
                     // After a successful metadata backup, prune the old ones.

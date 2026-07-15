@@ -1,0 +1,4 @@
+* Added support for Android 17
+* Improved handling of restic backup warnings
+* Fixed root shell initialization bugs
+* Improved Russian translations (thanks @lexar-systems)

@@ -54,7 +54,7 @@ android {
     defaultConfig {
         applicationId = "io.github.hddq.restoid"
         minSdk = 33
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 21
         versionName = "0.6.2"
 

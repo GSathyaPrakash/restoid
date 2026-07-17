@@ -1,0 +1,1 @@
+* Fixed restore for apps relying on symlinks (e.g., Termux) to prevent "Permission denied" errors

@@ -26,6 +26,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.hddq.restoid.R
 import io.github.hddq.restoid.data.RootState
 import io.github.hddq.restoid.data.StoragePermissionState
+import io.github.hddq.restoid.data.LocalNetworkPermissionState
 import io.github.hddq.restoid.ui.screens.settings.components.NotificationPermissionRow
 import io.github.hddq.restoid.ui.screens.settings.components.RootRequestRow
 import io.github.hddq.restoid.ui.screens.settings.components.RootStatusRow
@@ -35,10 +36,12 @@ import io.github.hddq.restoid.ui.settings.SettingsViewModel
 fun SystemSettings(
     viewModel: SettingsViewModel,
     notificationPermissionLauncher: () -> Unit,
+    localNetworkPermissionLauncher: () -> Unit,
     onOpenSettings: () -> Unit
 ) {
     val rootState by viewModel.rootState.collectAsStateWithLifecycle()
     val storagePermissionState by viewModel.storagePermissionState.collectAsStateWithLifecycle()
+    val localNetworkPermissionState by viewModel.localNetworkPermissionState.collectAsStateWithLifecycle()
     val notificationPermissionState by viewModel.notificationPermissionState.collectAsStateWithLifecycle()
     val batteryOptimizationDisabled by viewModel.isIgnoringBatteryOptimizations.collectAsStateWithLifecycle()
     val hasUsageStatsPermission by viewModel.hasUsageStatsPermission.collectAsStateWithLifecycle()
@@ -108,6 +111,13 @@ fun SystemSettings(
                         state = notificationPermissionState,
                         onRequestPermission = notificationPermissionLauncher,
                         onOpenSettings = onOpenSettings
+                    )
+                }
+                if (android.os.Build.VERSION.SDK_INT >= 37) {
+                    HorizontalDivider(color = MaterialTheme.colorScheme.background)
+                    LocalNetworkPermissionRow(
+                        state = localNetworkPermissionState,
+                        onRequestGrant = localNetworkPermissionLauncher
                     )
                 }
                 HorizontalDivider(color = MaterialTheme.colorScheme.background)
@@ -276,6 +286,49 @@ private fun BatteryOptimizationRow(
         if (!disabled) {
             Button(onClick = onRequestDisable) {
                 Text(stringResource(R.string.action_disable))
+            }
+        }
+    }
+}
+
+@Composable
+private fun LocalNetworkPermissionRow(
+    state: LocalNetworkPermissionState,
+    onRequestGrant: () -> Unit
+) {
+    if (state == LocalNetworkPermissionState.NotRequested) return
+    val granted = state == LocalNetworkPermissionState.Granted
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.weight(1f)
+        ) {
+            Icon(
+                imageVector = if (granted) Icons.Default.CheckCircle else Icons.Default.Error,
+                contentDescription = null,
+                modifier = Modifier.padding(end = 16.dp),
+                tint = if (granted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+            )
+            Column {
+                Text(
+                    text = if (granted) {
+                        stringResource(R.string.local_network_permission_enabled)
+                    } else {
+                        stringResource(R.string.settings_system_permission_local_network)
+                    }
+                )
+            }
+        }
+        if (!granted) {
+            Button(onClick = onRequestGrant) {
+                Text(stringResource(R.string.action_grant))
             }
         }
     }

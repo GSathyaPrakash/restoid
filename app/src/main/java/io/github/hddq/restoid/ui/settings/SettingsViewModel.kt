@@ -66,7 +66,8 @@ class SettingsViewModel(
     private val repositoriesRepository: RepositoriesRepository,
     private val notificationRepository: NotificationRepository,
     private val preferencesRepository: PreferencesRepository,
-    private val storagePermissionRepository: StoragePermissionRepository
+    private val storagePermissionRepository: StoragePermissionRepository,
+    private val localNetworkPermissionRepository: LocalNetworkPermissionRepository
 ) : ViewModel() {
 
     val rootState = rootRepository.rootState
@@ -76,6 +77,11 @@ class SettingsViewModel(
     val selectedRepository = repositoriesRepository.selectedRepository
     val notificationPermissionState = notificationRepository.permissionState
     val storagePermissionState = storagePermissionRepository.permissionState
+    val localNetworkPermissionState = localNetworkPermissionRepository.permissionState
+
+    fun updateLocalNetworkPermissionStatus() {
+        localNetworkPermissionRepository.checkPermissionStatus()
+    }
 
     private val _addRepoUiState = MutableStateFlow(AddRepoUiState())
     val addRepoUiState = _addRepoUiState.asStateFlow()

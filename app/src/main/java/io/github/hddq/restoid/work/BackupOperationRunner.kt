@@ -170,8 +170,23 @@ class BackupOperationRunner(
                 append(excludeFlags)
             }
 
+            val errorMessages = mutableListOf<String>()
+            var isOnlySafeErrors = true
             val stdoutCallback = object : CallbackList<String>() {
                 override fun onAddElement(line: String) {
+                    try {
+                        val json = org.json.JSONObject(line)
+                        if (json.optString("message_type") == "error") {
+                            val item = json.optString("item")
+                            val message = json.optJSONObject("error")?.optString("message") ?: ""
+                            val isSafe = item == "/data/user/0" && message.contains("user.serial")
+                            if (!isSafe) {
+                                isOnlySafeErrors = false
+                                errorMessages.add("Error in $item: $message")
+                            }
+                        }
+                    } catch (e: Exception) {}
+
                     ResticOutputParser.parse(line, context)?.let { progressUpdate ->
                         if (progressUpdate.isFinished) {
                             finalSummaryProgress = progressUpdate
@@ -191,8 +206,9 @@ class BackupOperationRunner(
             val result = Shell.cmd(command).to(stdoutCallback, stderr).exec()
             throwIfCancelled()
 
-            if (!result.isSuccess || snapshotId == null) {
-                val errorOutput = stderr.joinToString("\n")
+            val isResticSuccess = result.isSuccess || (result.code == 3 && isOnlySafeErrors)
+            if (!isResticSuccess || snapshotId == null) {
+                val errorOutput = if (errorMessages.isNotEmpty()) errorMessages.joinToString("\n") else stderr.joinToString("\n")
                 throw IllegalStateException(
                     if (errorOutput.isEmpty()) {
                         context.getString(R.string.backup_error_command_failed_with_code, result.code)

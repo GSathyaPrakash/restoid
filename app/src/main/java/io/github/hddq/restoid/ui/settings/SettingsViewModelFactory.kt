@@ -9,6 +9,8 @@ import io.github.hddq.restoid.data.RepositoriesRepository
 import io.github.hddq.restoid.data.ResticBinaryManager
 import io.github.hddq.restoid.data.ResticRepository
 import io.github.hddq.restoid.data.RootRepository
+import io.github.hddq.restoid.data.StoragePermissionRepository
+import io.github.hddq.restoid.data.LocalNetworkPermissionRepository
 
 class SettingsViewModelFactory(
     private val context: Context,
@@ -18,7 +20,8 @@ class SettingsViewModelFactory(
     private val repositoriesRepository: RepositoriesRepository,
     private val notificationRepository: NotificationRepository,
     private val preferencesRepository: PreferencesRepository,
-    private val storagePermissionRepository: io.github.hddq.restoid.data.StoragePermissionRepository
+    private val storagePermissionRepository: StoragePermissionRepository,
+    private val localNetworkPermissionRepository: LocalNetworkPermissionRepository
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(SettingsViewModel::class.java)) {
@@ -31,7 +34,8 @@ class SettingsViewModelFactory(
                 repositoriesRepository,
                 notificationRepository,
                 preferencesRepository,
-                storagePermissionRepository
+                storagePermissionRepository,
+                localNetworkPermissionRepository
             ) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")

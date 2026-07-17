@@ -598,7 +598,7 @@ class RestoreOperationRunner(
                 }
 
                 val copyResult = Shell.cmd(
-                    "find ${shellQuote(source.absolutePath)} -mindepth 1 -maxdepth 1 -exec cp -R '{}' ${shellQuote(destination)} ';'"
+                    "find ${shellQuote(source.absolutePath)} -mindepth 1 -maxdepth 1 -exec cp -a '{}' ${shellQuote(destination)} ';'"
                 ).exec()
                 if (!copyResult.isSuccess) {
                     allSucceeded = false
@@ -613,9 +613,7 @@ class RestoreOperationRunner(
                 }
 
                 val relabelCommand = if (isPrivateAppData && destinationContext != null) {
-                    "chcon -R ${shellQuote(destinationContext)} ${shellQuote(destination)}"
-                } else if (isPrivateAppData) {
-                    "restorecon -F ${shellQuote(destination)}"
+                    "chcon -h -R ${shellQuote(destinationContext)} ${shellQuote(destination)}"
                 } else {
                     "restorecon -RF ${shellQuote(destination)}"
                 }

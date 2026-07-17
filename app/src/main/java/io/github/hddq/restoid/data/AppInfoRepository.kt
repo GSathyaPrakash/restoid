@@ -179,10 +179,15 @@ class AppInfoRepository(private val context: Context) {
     suspend fun getGrantedRuntimePermissions(packageName: String): List<String> = withContext(Dispatchers.IO) {
         val pm = context.packageManager
         val packageInfo = try {
-            pm.getPackageInfo(
-                packageName,
-                PackageManager.PackageInfoFlags.of(PackageManager.GET_PERMISSIONS.toLong())
-            )
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                pm.getPackageInfo(
+                    packageName,
+                    PackageManager.PackageInfoFlags.of(PackageManager.GET_PERMISSIONS.toLong())
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                pm.getPackageInfo(packageName, PackageManager.GET_PERMISSIONS)
+            }
         } catch (_: Exception) {
             return@withContext emptyList()
         }

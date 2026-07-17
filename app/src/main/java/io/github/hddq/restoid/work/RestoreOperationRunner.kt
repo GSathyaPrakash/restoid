@@ -1,6 +1,7 @@
 package io.github.hddq.restoid.work
 
 import android.content.Context
+import android.os.Build
 import android.os.UserHandle
 import android.util.Log
 import com.topjohnwu.superuser.CallbackList
@@ -682,10 +683,18 @@ class RestoreOperationRunner(
 
     private fun isPackageInstalled(packageName: String): Boolean {
         return try {
-            context.packageManager.getPackageInfo(
-                packageName,
-                android.content.pm.PackageManager.PackageInfoFlags.of(0)
-            )
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                context.packageManager.getPackageInfo(
+                    packageName,
+                    android.content.pm.PackageManager.PackageInfoFlags.of(0)
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                context.packageManager.getPackageInfo(
+                    packageName,
+                    0
+                )
+            }
             true
         } catch (_: Exception) {
             false

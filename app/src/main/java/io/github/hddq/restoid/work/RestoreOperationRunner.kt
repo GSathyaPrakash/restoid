@@ -610,6 +610,20 @@ class RestoreOperationRunner(
                     if (!chownResult.isSuccess) {
                         allSucceeded = false
                     }
+                } else {
+                    val parentDir = File(destination).parentFile?.absolutePath
+                    if (parentDir != null) {
+                        val parentStat = Shell.cmd("stat -c '%g' ${shellQuote(parentDir)}").exec()
+                        val parentGid = parentStat.out.firstOrNull()?.trim()
+                        if (parentGid != null && parentGid.isNotEmpty()) {
+                            val uid = owner.substringBefore(":")
+                            val chownResult = Shell.cmd("chown -R $uid:$parentGid ${shellQuote(destination)}").exec()
+                            if (!chownResult.isSuccess) {
+                                allSucceeded = false
+                                Log.w("RestoreOperationRunner", "Failed to chown external path $destination to $uid:$parentGid")
+                            }
+                        }
+                    }
                 }
 
                 val relabelCommand = if (isPrivateAppData && destinationContext != null) {

@@ -162,7 +162,8 @@ class NotificationRepository(private val context: Context) {
     }
 
     fun showOperationProgressNotification(operationName: String, progress: OperationProgress) {
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU &&
+            ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             return
         }
 
@@ -174,7 +175,8 @@ class NotificationRepository(private val context: Context) {
     fun showOperationFinishedNotification(operationName: String, success: Boolean, summary: String) {
         cancelProgressNotification()
 
-        if (ActivityCompat.checkSelfPermission(
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU &&
+            ActivityCompat.checkSelfPermission(
                 context,
                 Manifest.permission.POST_NOTIFICATIONS
             ) != PackageManager.PERMISSION_GRANTED
@@ -189,6 +191,9 @@ class NotificationRepository(private val context: Context) {
 
     fun checkPermissionStatus() {
         when {
+            android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU -> {
+                _permissionState.value = NotificationPermissionState.Granted
+            }
             ContextCompat.checkSelfPermission(
                 context,
                 Manifest.permission.POST_NOTIFICATIONS

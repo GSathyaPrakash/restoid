@@ -1,0 +1,4 @@
+* Fixed a restore issue where external data directories had incorrect permissions
+* Added a biometric prompt before enabling the "Require app unlock on start" setting
+* Fixed the operation progress finish screen so it is now scrollable
+* Lowered minSdk to 29 (android 10)

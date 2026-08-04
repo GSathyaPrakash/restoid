@@ -227,7 +227,7 @@
     <string name="backup_item_media">Medya</string>
     <string name="backup_error_repository_id_not_found">Depo kimliği bulunamadı. Meta veriler kaydedilemiyor.</string>
     <string name="backup_stage_preparing">[%1$d/%2$d] Yedekleme hazırlanıyor...</string>
-    <string name="backup_stage_running">[%1$d/%2$d] Uygulamalar yedekleniyor…</string>
+    <string name="backup_stage_running">[%1$d/%2$d] Ögeler yedekleniyor…</string>
     <string name="backup_stage_finalizing">[%1$d/%2$d] Yedekleme sonlandırılıyor…</string>
     <string name="backup_error_command_failed_with_code">Restic komutu %1$d çıkış koduyla başarısız oldu.</string>
     <string name="backup_warning_metadata_not_saved">Uyarı: Yedekleme meta veri dosyası yerel olarak kaydedilemedi.</string>
@@ -255,7 +255,7 @@
     <string name="restore_stage_cleanup">Temizlik</string>
     <string name="restore_error_preflight_failed">Geri yükleme öncesi kontroller başarısız oldu.</string>
     <string name="restore_error_password_not_found">Depo için parola bulunamadı.</string>
-    <string name="restore_error_no_files_found">Seçili uygulamalar için anlık görüntüde dosya bulunamadı.</string>
+    <string name="restore_error_no_files_found">Seçili ögeler için anlık görüntüde (snapshot) hiçbir dosya bulunamadı.</string>
     <string name="restore_error_command_failed">Restic geri yükleme komutu başarısız oldu.</string>
     <string name="restore_failure_install_commit">%1$s: Yükleme işleme başarısız: %2$s</string>
     <string name="restore_failure_write_apk_splits">%1$s: APK bölümleri yazılamadı.</string>

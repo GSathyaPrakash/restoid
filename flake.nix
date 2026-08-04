@@ -46,7 +46,7 @@
         platformVersions = [ "37" ];
         buildToolsVersions = [ "37.0.0" ];
         abiVersions = [ "arm64-v8a" "x86_64" ];
-        includeEmulator = true;
+        includeEmulator = false;
         includeSystemImages = false;
         includeNDK = true;
         ndkVersions = [ ndkVersion ];
@@ -56,7 +56,6 @@
     in {
       devShells.${system}.default = pkgs.mkShell {
         packages = with pkgs; [
-	      android-studio
           jdk21
           gradle
           android-tools

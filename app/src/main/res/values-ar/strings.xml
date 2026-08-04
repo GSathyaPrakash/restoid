@@ -513,4 +513,18 @@
         <item quantity="few">تمت معالجة %1$d عناصر بنجاح (من 3 إلى 10 عناصر).</item>
         <item quantity="other">تمت معالجة %1$d عناصر بنجاح.</item>
     </plurals>
+    <string name="local_network_permission_enabled">تم منح الوصول للشبكة المحلية</string>
+    <plurals name="restore_summary_failed_items">
+        <item quantity="zero">فشل استعادة %1$d من العناصر.</item>
+        <item quantity="one">فشل استعادة %1$d عنصر واحد.</item>
+        <item quantity="two">فشلت استعادة %1$d عنصر.</item>
+        <item quantity="few">فشلت استعادة %1$d عناصر.</item>
+        <item quantity="other">فشلت استعادة %1$d عناصر.</item>
+    </plurals>
+    <string name="storage_permission_enabled">تم منح الوصول لجميع الملفات</string>
+    <string name="storage_permission_description">مطلوب لنسخ الأدلة المخصصة احتياطيًا بدون صلاحيات الروت.</string>
+    <string name="settings_system_permission_storage">الوصول إلى التخزين</string>
+    <string name="storage_permission_disabled">يتطلب الوصول لجميع الملفات</string>
+    <string name="settings_system_permission_local_network">الوصول إلى الشبكة المحلية</string>
+    <string name="action_run_now">تشغيل الآن</string>
 </resources>

@@ -38,7 +38,7 @@ Restoid gives you control over your app backups through a clean and simple user 
 ## ⚠️ Requirements
 
 * **Root Access**: Restoid requires elevated privileges to access app data directories. It uses `libsu` for robust root command execution.
-* **Android Version**: Minimum SDK 33 (Android 13).
+* **Android Version**: Minimum SDK 29 (Android 10), but SDK 37 (Android 17) is recommended.
 
 ## 🤝 How to Contribute
 

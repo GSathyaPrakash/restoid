@@ -422,4 +422,44 @@
     <string name="repo_warning_metadata_restore_failed">存储库已成功添加，但恢复其元数据（计划、备份详情信息）失败。这通常意味着元数据快照缺失或存储库被锁定。如需重试，请打开“设置”→“存储库”，点击存储库菜单，然后选择“恢复元数据”。</string>
     <string name="screen_tasks">任务</string>
     <string name="topbar_tasks">任务</string>
+    <string name="local_network_permission_enabled">已获得本地网络访问权限</string>
+    <string name="restore_failure_custom_directory">无法恢复自定义目录 %1$s</string>
+    <plurals name="restore_summary_failed_items">
+        <item quantity="other">还原 %1$d 个项目失败。</item>
+    </plurals>
+    <plurals name="backup_summary_success_items">
+        <item quantity="other">已备份 %1$d 个项目。</item>
+    </plurals>
+    <string name="run_tasks_custom_directories">自定义目录</string>
+    <string name="storage_permission_enabled">已获得所有文件访问权限</string>
+    <plurals name="custom_directories_count">
+        <item quantity="other">自定义目录 (%1$d):</item>
+    </plurals>
+    <plurals name="backed_up_items_count">
+        <item quantity="other">已备份 (%1$d):</item>
+    </plurals>
+    <string name="restore_stage_processing_template_apps">[%1$d/%2$d] 正在处理应用</string>
+    <plurals name="restore_summary_processed_items">
+        <item quantity="other">成功处理 %1$d 个项目。</item>
+    </plurals>
+    <string name="error_no_items_selected">未选择项目。</string>
+    <string name="storage_permission_description">在无 Root 权限下备份自定义目录所必需。</string>
+    <string name="restore_error_no_items_selected">未选择要恢复的项目。</string>
+    <string name="run_tasks_custom_directories_subtitle_count">%1$d 个目录已选择</string>
+    <string name="settings_system_permission_storage">存储访问权限</string>
+    <string name="backup_error_no_files_selected_for_items">未找到所选项对应的备份文件。</string>
+    <string name="storage_permission_disabled">需要所有文件访问权限</string>
+    <string name="restore_stage_processing_template_custom_directories">[%1$d/%2$d] 正在处理自定义目录</string>
+    <string name="settings_system_permission_local_network">本地网络访问权限</string>
+    <string name="restore_stage_processing_custom_directories">正在处理自定义目录…</string>
+    <plurals name="snapshot_backed_up_custom_directories_count">
+        <item quantity="other">已备份的自定义目录 (%1$d)</item>
+    </plurals>
+    <string name="custom_directories_description">选择设备上的自定义目录以包含在备份中。</string>
+    <string name="action_add_directory">添加目录</string>
+    <string name="run_tasks_custom_directories_subtitle_none">未选择目录</string>
+    <string name="summary_no_items_selected">未选择任何项目。</string>
+    <string name="action_run_now">立即运行</string>
+    <string name="error_cannot_backup_repo_to_itself">无法将备份仓库本身添加为自定义备份目录。</string>
+    <string name="title_custom_directories">自定义目录</string>
 </resources>

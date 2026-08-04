@@ -227,7 +227,7 @@
     <string name="backup_item_media">Medien</string>
     <string name="backup_error_repository_id_not_found">Repository-ID nicht gefunden. Metadaten können nicht gespeichert werden.</string>
     <string name="backup_stage_preparing">[%1$d/%2$d] Bereite Backup vor...</string>
-    <string name="backup_stage_running">[%1$d/%2$d] Sichere Apps…</string>
+    <string name="backup_stage_running">[%1$d/%2$d] Sichern der Elemente läuft…</string>
     <string name="backup_stage_finalizing">[%1$d/%2$d] Schließe Backup ab…</string>
     <string name="backup_error_command_failed_with_code">Restic-Befehl mit Exit-Code %1$d fehlgeschlagen.</string>
     <string name="backup_warning_metadata_not_saved">Warnung: Backup-Metadaten-Datei konnte nicht lokal gespeichert werden.</string>
@@ -255,7 +255,7 @@
     <string name="restore_stage_cleanup">Aufräumen</string>
     <string name="restore_error_preflight_failed">Vorabprüfungen für Restore fehlgeschlagen.</string>
     <string name="restore_error_password_not_found">Passwort für Repository nicht gefunden.</string>
-    <string name="restore_error_no_files_found">Keine Dateien im Snapshot für die ausgewählten Apps gefunden.</string>
+    <string name="restore_error_no_files_found">Für die ausgewählten Elemente wurden im Snapshot keine Dateien gefunden.</string>
     <string name="restore_error_command_failed">Restic-Restore-Befehl fehlgeschlagen.</string>
     <string name="restore_failure_install_commit">%1$s: Install Commit fehlgeschlagen: %2$s</string>
     <string name="restore_failure_write_apk_splits">%1$s: Schreiben der APK-Splits fehlgeschlagen.</string>

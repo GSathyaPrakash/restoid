@@ -233,7 +233,7 @@
     <string name="restore_stage_processing_apps">A processar Apps</string>
     <string name="restore_error_preflight_failed">Verificações pré-restauração falharam.</string>
     <string name="restore_error_password_not_found">Palavra-passe do repositório não encontrada.</string>
-    <string name="restore_error_no_files_found">Nenhum ficheiro encontrado no snapshot para as apps selecionadas.</string>
+    <string name="restore_error_no_files_found">Nenhum ficheiro encontrado no snapshot para os itens selecionados.</string>
     <string name="restore_error_command_failed">Comando de restauração do restic falhou.</string>
     <string name="restore_failure_install_commit">%1$s: Commit de instalação falhou: %2$s</string>
     <string name="restore_failure_write_apk_splits">%1$s: Falha ao gravar splits do APK.</string>
@@ -325,7 +325,7 @@
     <string name="backup_item_media">Multimédia</string>
     <string name="backup_error_repository_id_not_found">ID do repositório não encontrado. Não é possível guardar os metadados.</string>
     <string name="backup_stage_preparing">[%1$d/%2$d] A preparar cópia de segurança...</string>
-    <string name="backup_stage_running">[%1$d/%2$d] A criar cópia de segurança das aplicações…</string>
+    <string name="backup_stage_running">[%1$d/%2$d] A efetuar cópia de segurança dos itens…</string>
     <string name="backup_stage_finalizing">[%1$d/%2$d] A finalizar a cópia de segurança…</string>
     <string name="backup_error_command_failed_with_code">O comando Restic falhou com o código de saída %1$d.</string>
     <string name="backup_warning_metadata_not_saved">Aviso: não foi possível guardar localmente o ficheiro de metadados da cópia de segurança.</string>

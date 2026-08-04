@@ -244,7 +244,7 @@
     <string name="backup_item_media">メディア</string>
     <string name="backup_error_repository_id_not_found">リポジトリIDが見つかりません。メタデータを保存できません。</string>
     <string name="backup_stage_preparing">[%1$d/%2$d] バックアップを準備中…</string>
-    <string name="backup_stage_running">[%1$d/%2$d] アプリをバックアップ中…</string>
+    <string name="backup_stage_running">[%1$d/%2$d] 項目をバックアップ中…</string>
     <string name="backup_stage_finalizing">[%1$d/%2$d] バックアップを完了中…</string>
     <string name="backup_error_command_failed_with_code">Resticコマンドが終了コード %1$d で失敗しました。</string>
     <string name="backup_warning_metadata_not_saved">警告: バックアップメタデータファイルをローカルに保存できませんでした。</string>
@@ -272,7 +272,7 @@
     <string name="restore_stage_cleanup">クリーンアップ</string>
     <string name="usage_stats_permission_disabled">アプリ使用履歴へのアクセスが必要です</string>
     <string name="usage_stats_permission_description">ディレクトリをスキャンする代わりに、バックアップ時のアプリケーションサイズの計算を高速化します</string>
-    <string name="restore_error_no_files_found">選択したアプリのスナップショット内にファイルが見つかりません。</string>
+    <string name="restore_error_no_files_found">選択された項目のスナップショット内にファイルが見つかりませんでした。</string>
     <string name="restore_error_command_failed">Restic復元コマンドが失敗しました。</string>
     <string name="restore_failure_write_apk_splits">%1$s: APK分割ファイルの書き込みに失敗しました。</string>
     <string name="restore_failure_create_install_session">%1$s: インストールセッションの作成に失敗しました。</string>
@@ -445,4 +445,14 @@
     <plurals name="restore_summary_processed_items">
         <item quantity="other">%1$d 個の項目を正常に処理しました。</item>
     </plurals>
+    <plurals name="restore_summary_failed_items">
+        <item quantity="other">%1$d 項目の復元に失敗しました。</item>
+    </plurals>
+    <string name="action_run_now">今すぐ実行</string>
+    <string name="storage_permission_enabled">すべてのファイルへのアクセスを許可しました</string>
+    <string name="storage_permission_disabled">すべてのファイルへのアクセスが必要です</string>
+    <string name="storage_permission_description">root権限なしでカスタムディレクトリをバックアップするために必要です。</string>
+    <string name="settings_system_permission_storage">ストレージアクセス</string>
+    <string name="settings_system_permission_local_network">ローカルネットワークアクセス</string>
+    <string name="local_network_permission_enabled">ローカルネットワークアクセスを許可しました</string>
 </resources>

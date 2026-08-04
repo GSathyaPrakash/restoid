@@ -224,7 +224,7 @@
     <string name="backup_item_media">Phương tiện</string>
     <string name="backup_error_repository_id_not_found">Không tìm thấy ID kho lưu trữ. Không thể lưu siêu dữ liệu.</string>
     <string name="backup_stage_preparing">[%1$d/%2$d] Đang chuẩn bị sao lưu...</string>
-    <string name="backup_stage_running">[%1$d/%2$d] Đang sao lưu ứng dụng…</string>
+    <string name="backup_stage_running">[%1$d/%2$d] Đang sao lưu các mục…</string>
     <string name="backup_stage_finalizing">[%1$d/%2$d] Đang hoàn tất sao lưu…</string>
     <string name="backup_error_command_failed_with_code">Lệnh Restic thất bại với mã thoát %1$d.</string>
     <string name="backup_warning_metadata_not_saved">Cảnh báo: Không thể lưu tệp siêu dữ liệu sao lưu cục bộ.</string>
@@ -252,7 +252,7 @@
     <string name="restore_stage_cleanup">Dọn dẹp</string>
     <string name="restore_error_preflight_failed">Kiểm tra trước khi khôi phục thất bại.</string>
     <string name="restore_error_password_not_found">Không tìm thấy mật khẩu cho kho lưu trữ.</string>
-    <string name="restore_error_no_files_found">Không tìm thấy tệp nào trong snapshot cho các ứng dụng đã chọn.</string>
+    <string name="restore_error_no_files_found">Không tìm thấy tập tin nào trong bản sao chụp cho các mục đã chọn.</string>
     <string name="restore_error_command_failed">Lệnh khôi phục Restic thất bại.</string>
     <string name="restore_failure_install_commit">%1$s: Tiến trình cài đặt thất bại: %2$s</string>
     <string name="restore_failure_write_apk_splits">%1$s: Ghi các phần APK thất bại.</string>

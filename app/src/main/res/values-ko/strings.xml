@@ -422,4 +422,44 @@
     <string name="repo_warning_metadata_restore_failed">저장소가 성공적으로 추가되었지만 메타데이터(일정, 세부 백업 정보) 복원에 실패했습니다. 이는 일반적으로 메타데이터 스냅샷이 없거나 저장소가 잠겨 있을 때 발생합니다. 다시 시도하려면 설정 → 저장소로 이동하여 저장소 메뉴를 탭하고 \"메타데이터 복원\"을 선택하세요.</string>
     <string name="screen_tasks">작업</string>
     <string name="topbar_tasks">작업</string>
+    <string name="local_network_permission_enabled">로컬 네트워크 액세스 권한 허용됨</string>
+    <string name="restore_failure_custom_directory">사용자 지정 디렉터리 %1$s 복원 실패</string>
+    <plurals name="restore_summary_failed_items">
+        <item quantity="other">항목 %1$d개를 복원하지 못했습니다.</item>
+    </plurals>
+    <plurals name="backup_summary_success_items">
+        <item quantity="other">항목 %1$d개를 백업했습니다.</item>
+    </plurals>
+    <string name="run_tasks_custom_directories">사용자 지정 디렉터리</string>
+    <string name="storage_permission_enabled">모든 파일 액세스 권한 허용됨</string>
+    <plurals name="custom_directories_count">
+        <item quantity="other">사용자 지정 디렉터리 (%1$d):</item>
+    </plurals>
+    <plurals name="backed_up_items_count">
+        <item quantity="other">백업됨 (%1$d):</item>
+    </plurals>
+    <string name="restore_stage_processing_template_apps">[%1$d/%2$d] 앱 처리 중</string>
+    <plurals name="restore_summary_processed_items">
+        <item quantity="other">항목 %1$d개를 성공적으로 처리했습니다.</item>
+    </plurals>
+    <string name="error_no_items_selected">선택된 항목이 없습니다.</string>
+    <string name="storage_permission_description">루트 권한 없이 사용자 지정 디렉터리를 백업하기 위해 필요합니다.</string>
+    <string name="restore_error_no_items_selected">복원할 항목이 선택되지 않았습니다.</string>
+    <string name="run_tasks_custom_directories_subtitle_count">%1$d개의 디렉터리 선택됨</string>
+    <string name="settings_system_permission_storage">저장소 액세스</string>
+    <string name="backup_error_no_files_selected_for_items">선택한 항목에서 백업할 파일을 찾을 수 없습니다.</string>
+    <string name="storage_permission_disabled">모든 파일 액세스 권한 필요</string>
+    <string name="restore_stage_processing_template_custom_directories">[%1$d/%2$d] 사용자 지정 디렉터리 처리 중</string>
+    <string name="settings_system_permission_local_network">로컬 네트워크 액세스</string>
+    <string name="restore_stage_processing_custom_directories">사용자 지정 디렉터리 처리 중…</string>
+    <plurals name="snapshot_backed_up_custom_directories_count">
+        <item quantity="other">백업된 사용자 지정 디렉터리 (%1$d)</item>
+    </plurals>
+    <string name="custom_directories_description">백업에 포함할 기기의 사용자 지정 디렉터리를 선택하세요.</string>
+    <string name="action_add_directory">디렉터리 추가</string>
+    <string name="run_tasks_custom_directories_subtitle_none">선택된 디렉터리 없음</string>
+    <string name="summary_no_items_selected">선택된 항목이 없습니다.</string>
+    <string name="action_run_now">지금 실행</string>
+    <string name="error_cannot_backup_repo_to_itself">저장소 자체를 백업할 사용자 지정 디렉터리로 추가할 수 없습니다.</string>
+    <string name="title_custom_directories">사용자 지정 디렉터리</string>
 </resources>

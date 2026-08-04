@@ -218,16 +218,19 @@ class SchedulesViewModel(
     }
 
     private fun buildScheduleFromState(state: AddEditScheduleUiState): Schedule {
+        val hasRoot = rootState.value == io.github.hddq.restoid.data.RootState.Granted
+        val actualBackupEnabled = state.backupEnabled && hasRoot
+
         return Schedule(
             id = state.id ?: UUID.randomUUID().toString(),
             name = state.name.ifBlank { "Schedule" },
             intervalHours = state.intervalHours,
             isEnabled = state.isEnabled,
             config = RunTasksConfig(
-                backupEnabled = state.backupEnabled,
+                backupEnabled = actualBackupEnabled,
                 backupTypes = state.backupTypes.toSelection(),
-                selectedPackageNames = state.apps.filter { it.isSelected }.map { it.packageName },
-                appBackupTypes = selectedAppBackupTypes(state).mapValues { it.value.toSelection() },
+                selectedPackageNames = if (actualBackupEnabled) state.apps.filter { it.isSelected }.map { it.packageName } else emptyList(),
+                appBackupTypes = if (actualBackupEnabled) selectedAppBackupTypes(state).mapValues { it.value.toSelection() } else emptyMap(),
                 customDirectories = if (state.customDirectoriesBackupEnabled) state.customDirectories.filter { it.isSelected }.map { it.uri } else emptyList(),
                 unlockRepo = state.maintenance.unlockRepo,
                 forgetSnapshots = state.maintenance.forgetSnapshots,

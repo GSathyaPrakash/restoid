@@ -230,7 +230,7 @@
     <string name="backup_item_media">Mediji</string>
     <string name="backup_error_repository_id_not_found">ID repozitorija nije pronađen. Nemoguće spremiti metapodatke.</string>
     <string name="backup_stage_preparing">[%1$d/%2$d] Priprema backupa...</string>
-    <string name="backup_stage_running">[%1$d/%2$d] Backupiranje aplikacija…</string>
+    <string name="backup_stage_running">[%1$d/%2$d] Sigurnosno kopiranje stavki…</string>
     <string name="backup_stage_finalizing">[%1$d/%2$d] Završavanje backupa…</string>
     <string name="backup_error_command_failed_with_code">Restic naredba nije uspjela (izlazni kod %1$d).</string>
     <string name="backup_warning_metadata_not_saved">Upozorenje: Nije bilo moguće lokalno spremiti datoteku metapodataka backupa.</string>
@@ -258,7 +258,7 @@
     <string name="restore_stage_cleanup">Čišćenje</string>
     <string name="restore_error_preflight_failed">Provjere prije vraćanja nisu uspjele.</string>
     <string name="restore_error_password_not_found">Lozinka repozitorija nije pronađena.</string>
-    <string name="restore_error_no_files_found">U snapshotu nisu pronađene datoteke za odabrane aplikacije.</string>
+    <string name="restore_error_no_files_found">U snimci nije pronađena nijedna datoteka za odabrane stavke.</string>
     <string name="restore_error_command_failed">Restic naredba za vraćanje nije uspjela.</string>
     <string name="restore_failure_install_commit">%1$s: Install commit nije uspio: %2$s</string>
     <string name="restore_failure_write_apk_splits">%1$s: Zapisivanje APK splitova nije uspjelo.</string>

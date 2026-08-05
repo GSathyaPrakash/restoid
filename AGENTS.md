@@ -72,20 +72,26 @@ download from the Actions UI is therefore always `something.zip` containing the 
 **If you need a raw `.apk` download link** (installable directly), publish it as a GitHub
 **Release asset** — release assets are real files, no wrapper. The debug workflow does this
 via a rolling prerelease tagged `debug` (`softprops/action-gh-release@v3`), overwritten on
-every push so the link is stable:
-`https://github.com/<owner>/<repo>/releases/download/debug/restoid-arm64-debug.apk`
+every push so the link is stable. Verified working (~88 MB, mime
+`application/vnd.android.package-archive`):
+`https://github.com/GSathyaPrakash/restoid/releases/download/debug/restoid-arm64-debug.apk`
 
 Don't waste time trying to make `upload-artifact` produce a raw apk — it can't.
 That's why the debug workflow uses **no `upload-artifact` step at all**: the rolling
 `debug` release is the sole output, so there is no `.zip` anywhere.
 
+> **Do NOT re-add an `upload-artifact` step for the APK.** The repo owner has explicitly
+> rejected the `.zip` wrapper it produces — the rolling release is the intended download
+> mechanism. (If you ever add an artifact upload for a different reason, set
+> `if-no-files-found: error` so a wrong path fails loudly instead of silently uploading nothing.)
+
 ### 2. The `@v7` / `@v6` action versions ARE valid — do not "fix" them by downgrading
 
-This repo uses `actions/checkout@v7`, `actions/setup-go@v7`, `actions/upload-artifact@v7`,
+This repo uses `actions/checkout@v7`, `actions/setup-java@v5`, `actions/setup-go@v7`,
 `gradle/actions/setup-gradle@v6`, `android-actions/setup-android@v4`, `softprops/action-gh-release@v3`,
 `peaceiris/actions-gh-pages@v4`. At the time of writing these are all **current/latest** and correct.
-An earlier instinct was that `upload-artifact@v7` / `checkout@v7` looked "too high" and might be
-the debug-build bug — they were not.
+(`upload-artifact@v7` was also valid when it was in use; that step has since been removed — see gotcha #1.)
+An earlier instinct was that `checkout@v7` looked "too high" and might be the debug-build bug — it was not.
 
 **Always verify action versions against the GitHub API before changing them:**
 ```bash
@@ -120,13 +126,7 @@ SSH keys (`~/.ssh/id_ed25519`) are already set up and authenticate as `GSathyaPr
 Verify with `ssh -T git@github.com`. If a future push fails on auth, check the remote URL
 first.
 
-### 6. Use `if-no-files-found: error` on artifact uploads
-
-Cheap insurance. If the APK output path ever shifts (e.g. you re-enable splits and the
-filename changes), the upload step fails loudly instead of silently uploading an empty
-artifact that "succeeds".
-
-### 7. NDK version is not hardcoded in CI — it's parsed
+### 6. NDK version is not hardcoded in CI — it's parsed
 
 Both workflows and `build_restic.sh` read `ndkVersion` from `app/build.gradle.kts`:
 ```bash

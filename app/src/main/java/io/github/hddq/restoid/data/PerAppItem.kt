@@ -59,8 +59,12 @@ sealed class PerAppItem {
  *  - S3     : s3:bucket/prefix    -> s3:bucket/prefix/com.whatsapp
  */
 object PerAppRepositoryResolver {
-    fun deriveRepoPath(base: LocalRepository, item: PerAppItem): String {
+    fun deriveRepoPath(base: LocalRepository, item: PerAppItem): String =
+        deriveRepoPath(base, item.slug)
+
+    /** Derive a nested repository path from an explicit [slug] (e.g. read from the registry). */
+    fun deriveRepoPath(base: LocalRepository, slug: String): String {
         val basePath = base.path.trimEnd('/')
-        return if (basePath.isEmpty()) item.slug else "$basePath/${item.slug}"
+        return if (basePath.isEmpty()) slug else "$basePath/$slug"
     }
 }

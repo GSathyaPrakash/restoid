@@ -54,7 +54,10 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import io.github.hddq.restoid.data.NotificationRepository
 import io.github.hddq.restoid.ui.home.HomeViewModel
+import io.github.hddq.restoid.data.BackupMode
 import io.github.hddq.restoid.ui.home.HomeViewModelFactory
+import io.github.hddq.restoid.ui.home.PerAppHomeViewModel
+import io.github.hddq.restoid.ui.home.PerAppHomeViewModelFactory
 import io.github.hddq.restoid.ui.restore.RestoreViewModel
 import io.github.hddq.restoid.ui.restore.RestoreViewModelFactory
 import io.github.hddq.restoid.ui.runtasks.BackupConfigScreen
@@ -77,6 +80,7 @@ import io.github.hddq.restoid.ui.schedules.SchedulesScreen
 import io.github.hddq.restoid.ui.schedules.SchedulesViewModel
 import io.github.hddq.restoid.ui.schedules.SchedulesViewModelFactory
 import io.github.hddq.restoid.ui.screens.HomeScreen
+import io.github.hddq.restoid.ui.screens.PerAppHomeScreen
 import io.github.hddq.restoid.ui.screens.LicensesScreen
 import io.github.hddq.restoid.ui.screens.OperationProgressScreen
 import io.github.hddq.restoid.ui.screens.RestoreScreen
@@ -259,6 +263,11 @@ class MainActivity : FragmentActivity() {
                     factory = HomeViewModelFactory(app, app.repositoriesRepository, app.resticBinaryManager, app.resticRepository, app.appInfoRepository, app.metadataRepository)
                 )
                 val homeUiState by homeViewModel.uiState.collectAsState()
+                val perAppHomeViewModel: PerAppHomeViewModel = viewModel(
+                    factory = PerAppHomeViewModelFactory(app, app.repositoriesRepository, app.resticBinaryManager, app.resticRepository)
+                )
+                val perAppHomeUiState by perAppHomeViewModel.uiState.collectAsState()
+                val backupMode by app.preferencesRepository.backupMode.collectAsState()
                 val appBarActions = remember { mutableStateOf<(@Composable RowScope.() -> Unit)?>(null) }
 
                 if (openOperationProgressOnLaunch && isAppUnlocked) {
@@ -439,6 +448,15 @@ class MainActivity : FragmentActivity() {
                         modifier = Modifier.padding(innerPadding)
                     ) {
                         composable(Screen.Home.route) {
+                            if (backupMode == BackupMode.PER_APP) {
+                                PerAppHomeScreen(
+                                    uiState = perAppHomeUiState,
+                                    onRefresh = { perAppHomeViewModel.refresh() },
+                                    onDeleteHistory = { slug -> perAppHomeViewModel.requestDelete(slug) },
+                                    onConfirmDelete = { perAppHomeViewModel.confirmDelete() },
+                                    onCancelDelete = { perAppHomeViewModel.cancelDelete() }
+                                )
+                            } else {
                             HomeScreen(
                                 onSnapshotClick = { snapshotId -> navController.navigate("${Screen.SnapshotDetails.route}/$snapshotId") },
                                 uiState = homeUiState,
@@ -458,6 +476,7 @@ class MainActivity : FragmentActivity() {
                                 onDismissRestCredentialsDialog = { homeViewModel.onDismissRestCredentialsDialog() },
                                 onDismissS3CredentialsDialog = { homeViewModel.onDismissS3CredentialsDialog() }
                             )
+                            }
                         }
                         composable(Screen.Settings.route) {
                             val vm: SettingsViewModel = viewModel(

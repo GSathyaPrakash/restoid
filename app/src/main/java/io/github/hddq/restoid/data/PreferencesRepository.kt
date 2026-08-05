@@ -6,6 +6,8 @@ import io.github.hddq.restoid.model.MaintenanceConfig
 import io.github.hddq.restoid.ui.restore.RestoreTypes
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * How backups are organized on the selected repository.
@@ -22,6 +24,9 @@ enum class BackupMode {
 class PreferencesRepository(context: Context) {
     private val prefs = context.getSharedPreferences("user_preferences", Context.MODE_PRIVATE)
     private val json = Json { ignoreUnknownKeys = true }
+
+    private val _backupMode = MutableStateFlow(loadBackupMode())
+    val backupMode = _backupMode.asStateFlow()
 
     private companion object {
         const val KEY_REQUIRE_APP_UNLOCK = "require_app_unlock"
@@ -193,6 +198,7 @@ class PreferencesRepository(context: Context) {
     // Backup mode: a single shared repository (default) vs. one repository per app/dir.
     fun saveBackupMode(mode: BackupMode) {
         prefs.edit().putString("backup_mode", mode.name).apply()
+        _backupMode.value = mode
     }
 
     fun loadBackupMode(): BackupMode {

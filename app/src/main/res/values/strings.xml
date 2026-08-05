@@ -45,6 +45,13 @@
     <string name="per_app_error_backup_failed">Backup failed for %1$s: %2$s</string>
     <string name="per_app_mode_title">Per-App Repository Mode</string>
     <string name="per_app_mode_desc">Back up each app and directory into its own repository under the selected repository, so each can be restored or deleted independently.</string>
+    <string name="per_app_home_empty">No per-app backups yet. Run a backup from Tasks to create per-app repositories.</string>
+    <string name="per_app_item_app">Application</string>
+    <string name="per_app_item_directory">Directory</string>
+    <string name="per_app_no_backup_history">No snapshots</string>
+    <string name="per_app_action_delete_history">Delete backup history</string>
+    <string name="per_app_delete_confirm_title">Delete backup history?</string>
+    <string name="per_app_delete_confirm_message">This permanently deletes all snapshots for %1$s and frees the storage they used. This cannot be undone.</string>
 
     <string name="backup_types_title">Backup Types</string>
     <string name="backup_type_apk">APK</string>

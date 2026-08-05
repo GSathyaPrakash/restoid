@@ -19,12 +19,15 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.hddq.restoid.R
+import io.github.hddq.restoid.data.BackupMode
 import io.github.hddq.restoid.ui.screens.settings.components.AppUnlockOnStartRow
+import io.github.hddq.restoid.ui.screens.settings.components.PerAppModeRow
 import io.github.hddq.restoid.ui.settings.SettingsViewModel
 
 @Composable
 fun OptionsSettings(viewModel: SettingsViewModel) {
     val requireAppUnlock by viewModel.requireAppUnlock.collectAsStateWithLifecycle()
+    val backupMode by viewModel.backupMode.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     Column {
@@ -75,6 +78,14 @@ fun OptionsSettings(viewModel: SettingsViewModel) {
                         } else {
                             viewModel.onRequireAppUnlockChanged(false)
                         }
+                    }
+                )
+                PerAppModeRow(
+                    enabled = backupMode == BackupMode.PER_APP,
+                    onCheckedChange = { enabled ->
+                        viewModel.onBackupModeChanged(
+                            if (enabled) BackupMode.PER_APP else BackupMode.SINGLE
+                        )
                     }
                 )
             }

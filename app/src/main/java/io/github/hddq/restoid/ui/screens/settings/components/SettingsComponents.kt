@@ -148,6 +148,48 @@ fun AppUnlockOnStartRow(
 }
 
 @Composable
+fun PerAppModeRow(
+    enabled: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onCheckedChange(!enabled) }
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = stringResource(R.string.per_app_mode_title),
+                style = MaterialTheme.typography.bodyLarge
+            )
+            Text(
+                text = stringResource(R.string.per_app_mode_desc),
+                style = MaterialTheme.typography.bodySmall,
+                color = LocalContentColor.current.copy(alpha = 0.75f)
+            )
+        }
+        Switch(
+            checked = enabled,
+            onCheckedChange = onCheckedChange,
+            thumbContent = if (enabled) {
+                {
+                    Icon(
+                        imageVector = Icons.Filled.Check,
+                        contentDescription = null,
+                        modifier = Modifier.size(SwitchDefaults.IconSize)
+                    )
+                }
+            } else {
+                null
+            }
+        )
+    }
+}
+
+@Composable
 fun SelectableRepositoryRow(
     repo: LocalRepository,
     isSelected: Boolean,

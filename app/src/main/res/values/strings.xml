@@ -43,6 +43,8 @@
     <string name="per_app_error_no_items">No applications or directories selected for per-app backup</string>
     <string name="per_app_error_init_failed">Failed to create repository for %1$s: %2$s</string>
     <string name="per_app_error_backup_failed">Backup failed for %1$s: %2$s</string>
+    <string name="per_app_mode_title">Per-App Repository Mode</string>
+    <string name="per_app_mode_desc">Back up each app and directory into its own repository under the selected repository, so each can be restored or deleted independently.</string>
 
     <string name="backup_types_title">Backup Types</string>
     <string name="backup_type_apk">APK</string>

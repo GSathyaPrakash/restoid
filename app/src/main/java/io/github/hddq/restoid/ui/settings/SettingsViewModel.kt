@@ -106,6 +106,9 @@ class SettingsViewModel(
     private val _requireAppUnlock = MutableStateFlow(preferencesRepository.loadRequireAppUnlock())
     val requireAppUnlock = _requireAppUnlock.asStateFlow()
 
+    private val _backupMode = MutableStateFlow(preferencesRepository.loadBackupMode())
+    val backupMode = _backupMode.asStateFlow()
+
     private val _isIgnoringBatteryOptimizations = MutableStateFlow(false)
     val isIgnoringBatteryOptimizations = _isIgnoringBatteryOptimizations.asStateFlow()
 
@@ -275,6 +278,11 @@ class SettingsViewModel(
     fun onRequireAppUnlockChanged(required: Boolean) {
         _requireAppUnlock.value = required
         preferencesRepository.saveRequireAppUnlock(required)
+    }
+
+    fun onBackupModeChanged(mode: BackupMode) {
+        _backupMode.value = mode
+        preferencesRepository.saveBackupMode(mode)
     }
 
     fun refreshBatteryOptimizationStatus() {

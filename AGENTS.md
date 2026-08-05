@@ -76,6 +76,8 @@ every push so the link is stable:
 `https://github.com/<owner>/<repo>/releases/download/debug/restoid-arm64-debug.apk`
 
 Don't waste time trying to make `upload-artifact` produce a raw apk — it can't.
+That's why the debug workflow uses **no `upload-artifact` step at all**: the rolling
+`debug` release is the sole output, so there is no `.zip` anywhere.
 
 ### 2. The `@v7` / `@v6` action versions ARE valid — do not "fix" them by downgrading
 
@@ -141,7 +143,7 @@ to pick the right `android<API>` clang).
 ### Debug (`android-debug.yml`) — triggers on push to `master`, PRs, and manual dispatch
 - Builds restic **arm64-v8a only** (`RESTIC_ABIS=arm64-v8a`) → fast.
 - `./gradlew assembleDebug -PenabledAbis=arm64-v8a` → one `app-debug.apk`.
-- Uploads artifact `restoid-arm64-debug` (a zip — see gotcha #1).
+- **No `upload-artifact` step** — it would always wrap the apk in a `.zip` (see gotcha #1).
 - On **push** events only: publishes `restoid-arm64-debug.apk` as a raw asset to the rolling
   `debug` prerelease (see gotcha #1). PRs don't clobber it.
 - Has `permissions: contents: write` (needed to create the release).

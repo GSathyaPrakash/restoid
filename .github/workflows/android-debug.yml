@@ -69,17 +69,6 @@ jobs:
           set -euo pipefail
           ./gradlew --no-daemon clean assembleDebug -PenabledAbis=arm64-v8a
 
-      - name: Upload arm64-v8a debug APK
-        uses: actions/upload-artifact@v7
-        with:
-          name: restoid-arm64-debug
-          path: app/build/outputs/apk/debug/*.apk
-          if-no-files-found: error
-          # APKs are already ZIP archives; re-compressing wastes CPU for ~0 gain.
-          # NOTE: GitHub always wraps artifacts in a .zip — this is unavoidable.
-          # For a raw .apk download, use the rolling release published below.
-          compression-level: 0
-
       - name: Stage APK with a clear filename
         run: |
           set -euo pipefail

@@ -46,15 +46,28 @@ class HeavyOperationWorker(
             when (operationType) {
                 OperationType.BACKUP -> {
                     val request = app.operationRequestStore.loadBackupRequest(requestId)
-                    val runner = BackupOperationRunner(
-                        context = applicationContext,
-                        repositoriesRepository = app.repositoriesRepository,
-                        resticBinaryManager = app.resticBinaryManager,
-                        resticRepository = app.resticRepository,
-                        appInfoRepository = app.appInfoRepository,
-                        operationLockManager = app.operationLockManager
-                    )
-                    runner.run(request, notifier::onProgress, shouldStop)
+                    if (request.perAppMode) {
+                        val runner = PerAppBackupOperationRunner(
+                            context = applicationContext,
+                            repositoriesRepository = app.repositoriesRepository,
+                            resticBinaryManager = app.resticBinaryManager,
+                            resticRepository = app.resticRepository,
+                            appInfoRepository = app.appInfoRepository,
+                            metadataRepository = app.metadataRepository,
+                            operationLockManager = app.operationLockManager
+                        )
+                        runner.run(request, notifier::onProgress, shouldStop)
+                    } else {
+                        val runner = BackupOperationRunner(
+                            context = applicationContext,
+                            repositoriesRepository = app.repositoriesRepository,
+                            resticBinaryManager = app.resticBinaryManager,
+                            resticRepository = app.resticRepository,
+                            appInfoRepository = app.appInfoRepository,
+                            operationLockManager = app.operationLockManager
+                        )
+                        runner.run(request, notifier::onProgress, shouldStop)
+                    }
                 }
 
                 OperationType.RUN_TASKS -> {
@@ -66,6 +79,7 @@ class HeavyOperationWorker(
                         resticBinaryManager = app.resticBinaryManager,
                         resticRepository = app.resticRepository,
                         appInfoRepository = app.appInfoRepository,
+                        metadataRepository = app.metadataRepository,
                         operationLockManager = app.operationLockManager
                     )
                     runner.run(request, notifier::onProgress, shouldStop)

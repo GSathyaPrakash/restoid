@@ -37,6 +37,13 @@
     <string name="operation_maintenance">Maintenance</string>
     <string name="run_tasks_phase_summary">%1$s:\n%2$s</string>
 
+    <string name="restic_failure_init_repository">Failed to initialize repository</string>
+    <string name="per_app_stage_preparing_item">Preparing %1$s (%2$d/%3$d)</string>
+    <string name="per_app_stage_backing_up">Backing up %1$s (%2$d/%3$d)</string>
+    <string name="per_app_error_no_items">No applications or directories selected for per-app backup</string>
+    <string name="per_app_error_init_failed">Failed to create repository for %1$s: %2$s</string>
+    <string name="per_app_error_backup_failed">Backup failed for %1$s: %2$s</string>
+
     <string name="backup_types_title">Backup Types</string>
     <string name="backup_type_apk">APK</string>
     <string name="backup_type_apk_desc">The application package file</string>

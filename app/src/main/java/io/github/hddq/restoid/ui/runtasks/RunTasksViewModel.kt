@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.hddq.restoid.R
+import io.github.hddq.restoid.data.BackupMode
 import io.github.hddq.restoid.data.OperationType
 import io.github.hddq.restoid.data.RepositoriesRepository
 import io.github.hddq.restoid.data.RepositoryBackendType
@@ -185,7 +186,8 @@ class RunTasksViewModel(
             keepLast = maintenance.keepLast,
             keepDaily = maintenance.keepDaily,
             keepWeekly = maintenance.keepWeekly,
-            keepMonthly = maintenance.keepMonthly
+            keepMonthly = maintenance.keepMonthly,
+            perAppMode = preferencesRepository.loadBackupMode() == BackupMode.PER_APP
         )
 
         viewModelScope.launch(Dispatchers.IO) {

@@ -3,6 +3,7 @@ package io.github.hddq.restoid.work
 import android.content.Context
 import io.github.hddq.restoid.R
 import io.github.hddq.restoid.data.AppInfoRepository
+import io.github.hddq.restoid.data.MetadataRepository
 import io.github.hddq.restoid.data.OperationLockManager
 import io.github.hddq.restoid.data.RepositoriesRepository
 import io.github.hddq.restoid.data.ResticBinaryManager
@@ -15,6 +16,7 @@ class RunTasksOperationRunner(
     private val resticBinaryManager: ResticBinaryManager,
     private val resticRepository: ResticRepository,
     private val appInfoRepository: AppInfoRepository,
+    private val metadataRepository: MetadataRepository,
     private val operationLockManager: OperationLockManager
 ) {
 
@@ -35,6 +37,18 @@ class RunTasksOperationRunner(
             repositoriesRepository = repositoriesRepository,
             resticBinaryManager = resticBinaryManager,
             resticRepository = resticRepository,
+            operationLockManager = operationLockManager
+        )
+    }
+
+    private val perAppBackupRunner by lazy {
+        PerAppBackupOperationRunner(
+            context = context,
+            repositoriesRepository = repositoriesRepository,
+            resticBinaryManager = resticBinaryManager,
+            resticRepository = resticRepository,
+            appInfoRepository = appInfoRepository,
+            metadataRepository = metadataRepository,
             operationLockManager = operationLockManager
         )
     }
@@ -100,10 +114,12 @@ class RunTasksOperationRunner(
                     backupTypes = request.backupTypes,
                     selectedPackageNames = request.selectedPackageNames,
                     appBackupTypes = request.appBackupTypes,
-                    customDirectories = request.customDirectories
+                    customDirectories = request.customDirectories,
+                    perAppMode = request.perAppMode
                 )
 
-                val result = backupRunner.run(
+                val runner = if (request.perAppMode) perAppBackupRunner else backupRunner
+                val result = runner.run(
                     request = backupRequest,
                     onProgress = { childProgress ->
                         progressState = mapChildProgress(childProgress, backupStageCount)

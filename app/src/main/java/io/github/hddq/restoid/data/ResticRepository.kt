@@ -255,6 +255,31 @@ class ResticRepository(
             }
     }
 
+    /**
+     * Ensures a restic repository exists at [repoPath]. If one already exists the
+     * call succeeds without side effects; otherwise it runs `restic init`.
+     *
+     * Used by per-app mode to lazily create each nested repository on first backup.
+     * Password, environment and options are inherited from the base repository.
+     */
+    suspend fun ensureRepository(
+        repoPath: String,
+        password: String,
+        environmentVariables: Map<String, String> = emptyMap(),
+        resticOptions: Map<String, String> = emptyMap()
+    ): Result<Unit> {
+        val existing = getConfig(repoPath, password, environmentVariables, resticOptions)
+        if (existing.isSuccess) return Result.success(Unit)
+        return executor.execute(
+            repoPath,
+            password,
+            "init",
+            context.getString(R.string.restic_failure_init_repository),
+            environmentVariables = environmentVariables,
+            resticOptions = resticOptions
+        ).map { Unit }
+    }
+
     suspend fun changePassword(
         repoPath: String,
         oldPassword: String,

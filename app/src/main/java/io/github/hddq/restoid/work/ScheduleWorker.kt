@@ -7,6 +7,7 @@ import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import io.github.hddq.restoid.R
 import io.github.hddq.restoid.RestoidApplication
+import io.github.hddq.restoid.data.BackupMode
 import io.github.hddq.restoid.ui.shared.OperationProgress
 
 class ScheduleWorker(
@@ -53,6 +54,7 @@ class ScheduleWorker(
             keepDaily = schedule.config.keepDaily,
             keepWeekly = schedule.config.keepWeekly,
             keepMonthly = schedule.config.keepMonthly,
+            perAppMode = app.preferencesRepository.loadBackupMode() == BackupMode.PER_APP,
             scheduleName = schedule.name
         )
         val enqueued = app.operationWorkRepository.enqueueRunTasks(workRequest)

@@ -36,7 +36,9 @@ data class BackupWorkRequest(
     val backupTypes: BackupTypeSelection,
     val selectedPackageNames: List<String>,
     val appBackupTypes: Map<String, BackupTypeSelection> = emptyMap(),
-    val customDirectories: List<String> = emptyList()
+    val customDirectories: List<String> = emptyList(),
+    /** When true, each selected app/dir is backed up into its own nested repository. */
+    val perAppMode: Boolean = false
 )
 
 @Serializable
@@ -99,5 +101,6 @@ data class RunTasksWorkRequest(
     val keepDaily: Int,
     val keepWeekly: Int,
     val keepMonthly: Int,
+    val perAppMode: Boolean = false,
     val scheduleName: String? = null
 )

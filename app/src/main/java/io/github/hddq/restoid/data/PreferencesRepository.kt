@@ -7,6 +7,18 @@ import io.github.hddq.restoid.ui.restore.RestoreTypes
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
+/**
+ * How backups are organized on the selected repository.
+ * - [SINGLE]: all selected apps share one restic repository (legacy/default behavior).
+ * - [PER_APP]: each app and each custom directory gets its own restic repository
+ *   nested under the selected repository's path, giving each item an independent
+ *   backup history that can be deleted in isolation.
+ */
+enum class BackupMode {
+    SINGLE,
+    PER_APP
+}
+
 class PreferencesRepository(context: Context) {
     private val prefs = context.getSharedPreferences("user_preferences", Context.MODE_PRIVATE)
     private val json = Json { ignoreUnknownKeys = true }
@@ -176,5 +188,16 @@ class PreferencesRepository(context: Context) {
 
     fun loadRequireAppUnlock(): Boolean {
         return prefs.getBoolean(KEY_REQUIRE_APP_UNLOCK, false)
+    }
+
+    // Backup mode: a single shared repository (default) vs. one repository per app/dir.
+    fun saveBackupMode(mode: BackupMode) {
+        prefs.edit().putString("backup_mode", mode.name).apply()
+    }
+
+    fun loadBackupMode(): BackupMode {
+        return prefs.getString("backup_mode", BackupMode.SINGLE.name)
+            ?.let { runCatching { BackupMode.valueOf(it) }.getOrNull() }
+            ?: BackupMode.SINGLE
     }
 }

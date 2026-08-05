@@ -49,7 +49,10 @@ data class RestoreWorkRequest(
     val allowDowngrade: Boolean,
     val selectedApps: List<RestoreAppSelection>,
     val appRestoreTypes: Map<String, RestoreTypeSelection> = emptyMap(),
-    val selectedCustomDirectories: List<String> = emptyList()
+    val selectedCustomDirectories: List<String> = emptyList(),
+    /** When set, credentials/env/options/backend come from this base repo while restoring
+     * from [repositoryKey] (a per-app derived path). Null in single-repository mode. */
+    val baseRepositoryKey: String? = null
 )
 
 @Serializable

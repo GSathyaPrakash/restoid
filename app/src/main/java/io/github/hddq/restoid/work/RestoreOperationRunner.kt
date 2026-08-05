@@ -75,10 +75,14 @@ class RestoreOperationRunner(
         val finalResult = try {
             throwIfCancelled()
             val resticState = resticBinaryManager.resticState.value
-            val selectedRepository = repositoriesRepository.getRepositoryByKey(request.repositoryKey)
-            val selectedRepoPath = selectedRepository?.path
+            // Per-app restore: request.repositoryKey is the derived repo path; credentials,
+            // env, options and backend type come from the base repo (request.baseRepositoryKey).
+            // Single mode: baseRepositoryKey is null so credKey == request.repositoryKey.
+            val credKey = request.baseRepositoryKey ?: request.repositoryKey
+            val selectedRepository = repositoriesRepository.getRepositoryByKey(credKey)
+            val selectedRepoPath = request.repositoryKey
 
-            if (resticState !is ResticState.Installed || selectedRepoPath == null) {
+            if (resticState !is ResticState.Installed || selectedRepository == null) {
                 throw IllegalStateException(context.getString(R.string.restore_error_preflight_failed))
             }
 
@@ -90,20 +94,20 @@ class RestoreOperationRunner(
                 throw IllegalStateException(context.getString(R.string.root_access_denied))
             }
 
-            val currentSnapshot = findSnapshot(request)
+            val currentSnapshot = findSnapshot(selectedRepoPath, credKey, request.snapshotId)
                 ?: throw IllegalStateException(context.getString(R.string.error_snapshot_not_found))
 
             operationLockManager.acquire(selectedRepository.backendType)
             operationLockAcquired = true
 
-            if (selectedRepository.backendType == RepositoryBackendType.SFTP && !repositoriesRepository.hasSftpCredentials(request.repositoryKey)) {
+            if (selectedRepository.backendType == RepositoryBackendType.SFTP && !repositoriesRepository.hasSftpCredentials(credKey)) {
                 throw IllegalStateException(context.getString(R.string.error_sftp_password_not_found_for_repository))
             }
 
             if (
                 selectedRepository.backendType == RepositoryBackendType.REST &&
                 selectedRepository.restAuthRequired &&
-                !repositoriesRepository.hasRestCredentials(request.repositoryKey)
+                !repositoriesRepository.hasRestCredentials(credKey)
             ) {
                 throw IllegalStateException(context.getString(R.string.error_rest_credentials_not_found_for_repository))
             }
@@ -111,12 +115,12 @@ class RestoreOperationRunner(
             if (
                 selectedRepository.backendType == RepositoryBackendType.S3 &&
                 selectedRepository.s3AuthRequired &&
-                !repositoriesRepository.hasS3Credentials(request.repositoryKey)
+                !repositoriesRepository.hasS3Credentials(credKey)
             ) {
                 throw IllegalStateException(context.getString(R.string.error_s3_credentials_not_found_for_repository))
             }
 
-            val password = repositoriesRepository.getRepositoryPassword(request.repositoryKey)
+            val password = repositoriesRepository.getRepositoryPassword(credKey)
                 ?: throw IllegalStateException(context.getString(R.string.restore_error_password_not_found))
 
             passwordFile = File.createTempFile("restic-pass", ".tmp", context.cacheDir)
@@ -126,8 +130,14 @@ class RestoreOperationRunner(
 
             val pathsToRestore = generatePathsToRestore(selectedAppPackages, currentSnapshot, request.restoreTypes, request.appRestoreTypes).toMutableList()
             pathsToRestore.addAll(request.selectedCustomDirectories)
-            val metadata = selectedRepository.id?.let { repoId ->
-                metadataRepository.getMetadataForSnapshot(repoId, currentSnapshot.id)
+            // Per-app snapshots store metadata under the derived repo's id, which is not
+            // resolved here; permission restoration is skipped in per-app mode for now.
+            val metadata = if (request.baseRepositoryKey == null) {
+                selectedRepository.id?.let { repoId ->
+                    metadataRepository.getMetadataForSnapshot(repoId, currentSnapshot.id)
+                }
+            } else {
+                null
             }
 
             if (pathsToRestore.isEmpty() && !permissionsRestoreSelected) {
@@ -141,11 +151,11 @@ class RestoreOperationRunner(
                     "HOME" to context.filesDir.absolutePath,
                     "TMPDIR" to context.cacheDir.absolutePath
                 ).apply {
-                    putAll(repositoriesRepository.getExecutionEnvironmentVariables(request.repositoryKey))
+                    putAll(repositoriesRepository.getExecutionEnvironmentVariables(credKey))
                 }
                 val envPrefix = buildShellEnvironmentPrefix(commandEnvironment)
                 val resticOptionFlags = buildResticOptionFlags(
-                    repositoriesRepository.getExecutionResticOptions(request.repositoryKey)
+                    repositoriesRepository.getExecutionResticOptions(credKey)
                 )
 
                 val command = buildString {
@@ -455,17 +465,16 @@ class RestoreOperationRunner(
         return finalResult
     }
 
-    private suspend fun findSnapshot(request: RestoreWorkRequest): SnapshotInfo? {
-        val repository = repositoriesRepository.getRepositoryByKey(request.repositoryKey) ?: return null
-        val password = repositoriesRepository.getRepositoryPassword(request.repositoryKey) ?: return null
+    private suspend fun findSnapshot(repoPath: String, credKey: String, snapshotId: String): SnapshotInfo? {
+        val password = repositoriesRepository.getRepositoryPassword(credKey) ?: return null
         val snapshotsResult = resticRepository.getSnapshots(
-            repository.path,
+            repoPath,
             password,
-            repositoriesRepository.getExecutionEnvironmentVariables(request.repositoryKey),
-            repositoriesRepository.getExecutionResticOptions(request.repositoryKey)
+            repositoriesRepository.getExecutionEnvironmentVariables(credKey),
+            repositoriesRepository.getExecutionResticOptions(credKey)
         )
         val snapshots = snapshotsResult.getOrNull() ?: return null
-        return snapshots.find { it.id == request.snapshotId } ?: snapshots.find { it.id.startsWith(request.snapshotId) }
+        return snapshots.find { it.id == snapshotId } ?: snapshots.find { it.id.startsWith(snapshotId) }
     }
     private fun getCurrentUserId(): Int {
         return try {

@@ -52,6 +52,11 @@
     <string name="per_app_action_delete_history">Delete backup history</string>
     <string name="per_app_delete_confirm_title">Delete backup history?</string>
     <string name="per_app_delete_confirm_message">This permanently deletes all snapshots for %1$s and frees the storage they used. This cannot be undone.</string>
+    <string name="action_restore">Restore</string>
+    <string name="per_app_restore_title">Restore</string>
+    <string name="per_app_restore_loading">Loading snapshots…</string>
+    <string name="per_app_restore_pick_version">Pick a version to restore (latest selected by default):</string>
+    <string name="per_app_restore_no_snapshots">No snapshots available to restore.</string>
 
     <string name="backup_types_title">Backup Types</string>
     <string name="backup_type_apk">APK</string>

@@ -31,6 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
@@ -56,6 +57,7 @@ import io.github.hddq.restoid.data.NotificationRepository
 import io.github.hddq.restoid.ui.home.HomeViewModel
 import io.github.hddq.restoid.data.BackupMode
 import io.github.hddq.restoid.ui.home.HomeViewModelFactory
+import io.github.hddq.restoid.ui.home.PerAppHomeEvent
 import io.github.hddq.restoid.ui.home.PerAppHomeViewModel
 import io.github.hddq.restoid.ui.home.PerAppHomeViewModelFactory
 import io.github.hddq.restoid.ui.restore.RestoreViewModel
@@ -264,7 +266,7 @@ class MainActivity : FragmentActivity() {
                 )
                 val homeUiState by homeViewModel.uiState.collectAsState()
                 val perAppHomeViewModel: PerAppHomeViewModel = viewModel(
-                    factory = PerAppHomeViewModelFactory(app, app.repositoriesRepository, app.resticBinaryManager, app.resticRepository)
+                    factory = PerAppHomeViewModelFactory(app, app.repositoriesRepository, app.resticBinaryManager, app.resticRepository, app.preferencesRepository, app.operationWorkRepository)
                 )
                 val perAppHomeUiState by perAppHomeViewModel.uiState.collectAsState()
                 val backupMode by app.preferencesRepository.backupMode.collectAsState()
@@ -449,12 +451,23 @@ class MainActivity : FragmentActivity() {
                     ) {
                         composable(Screen.Home.route) {
                             if (backupMode == BackupMode.PER_APP) {
+                                LaunchedEffect(perAppHomeViewModel) {
+                                    perAppHomeViewModel.events.collect { event ->
+                                        if (event == PerAppHomeEvent.NavigateToOperationProgress) {
+                                            navController.navigate(Screen.OperationProgress.route) { launchSingleTop = true }
+                                        }
+                                    }
+                                }
                                 PerAppHomeScreen(
                                     uiState = perAppHomeUiState,
                                     onRefresh = { perAppHomeViewModel.refresh() },
                                     onDeleteHistory = { slug -> perAppHomeViewModel.requestDelete(slug) },
                                     onConfirmDelete = { perAppHomeViewModel.confirmDelete() },
-                                    onCancelDelete = { perAppHomeViewModel.cancelDelete() }
+                                    onCancelDelete = { perAppHomeViewModel.cancelDelete() },
+                                    onRestore = { slug -> perAppHomeViewModel.requestRestore(slug) },
+                                    onSelectSnapshot = { id -> perAppHomeViewModel.selectSnapshot(id) },
+                                    onConfirmRestore = { perAppHomeViewModel.confirmRestore() },
+                                    onCancelRestore = { perAppHomeViewModel.cancelRestore() }
                                 )
                             } else {
                             HomeScreen(

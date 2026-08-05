@@ -8,6 +8,9 @@ import io.github.hddq.restoid.data.AppInfoRepository
 import io.github.hddq.restoid.data.MetadataRepository
 import io.github.hddq.restoid.data.OperationLockManager
 import io.github.hddq.restoid.data.PerAppItem
+import io.github.hddq.restoid.data.PerAppItemDescriptor
+import io.github.hddq.restoid.data.PerAppItemKind
+import io.github.hddq.restoid.data.PerAppItemRegistry
 import io.github.hddq.restoid.data.PerAppRepositoryResolver
 import io.github.hddq.restoid.data.RepositoriesRepository
 import io.github.hddq.restoid.data.ResticBinaryManager
@@ -54,6 +57,7 @@ class PerAppBackupOperationRunner(
     private val operationLockManager: OperationLockManager
 ) {
 
+    private val perAppItemRegistry = PerAppItemRegistry(context)
     private val json = Json { prettyPrint = true }
 
     suspend fun run(
@@ -285,6 +289,23 @@ class PerAppBackupOperationRunner(
                                 metadataRepository.saveMetadataForSnapshot(derivedRepoId, snapshotId!!, metadata)
                             }
                         }
+                        perAppItemRegistry.addItem(
+                            baseKey,
+                            when (item) {
+                                is PerAppItem.App -> PerAppItemDescriptor(
+                                    slug = item.slug,
+                                    displayName = item.displayName,
+                                    kind = PerAppItemKind.APP,
+                                    packageName = item.packageName
+                                )
+                                is PerAppItem.CustomDir -> PerAppItemDescriptor(
+                                    slug = item.slug,
+                                    displayName = item.displayName,
+                                    kind = PerAppItemKind.CUSTOM_DIR,
+                                    customDirUri = item.uri
+                                )
+                            }
+                        )
                         summaries += context.getString(
                             R.string.run_tasks_phase_summary,
                             item.displayName,

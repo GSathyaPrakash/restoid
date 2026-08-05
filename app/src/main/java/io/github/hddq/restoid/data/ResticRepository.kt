@@ -219,6 +219,32 @@ class ResticRepository(
             }
     }
 
+    /**
+     * Removes every snapshot from a repository and prunes the now-unreferenced
+     * data, deleting its complete backup history and freeing storage. Leaves the
+     * repository itself in place so subsequent backups need not re-initialize it.
+     * Works for every backend. Used by per-app "delete backup history".
+     */
+    suspend fun forgetAll(
+        repoPath: String,
+        password: String,
+        environmentVariables: Map<String, String> = emptyMap(),
+        resticOptions: Map<String, String> = emptyMap()
+    ): Result<Unit> = withContext(Dispatchers.IO) {
+        val snapshots = getSnapshots(repoPath, password, environmentVariables, resticOptions)
+            .getOrDefault(emptyList())
+        if (snapshots.isEmpty()) return@withContext Result.success(Unit)
+        val ids = snapshots.joinToString(" ") { shellQuote(it.id) }
+        executor.execute(
+            repoPath,
+            password,
+            "forget $ids --prune",
+            context.getString(R.string.restic_failure_delete_snapshot),
+            environmentVariables = environmentVariables,
+            resticOptions = resticOptions
+        ).map { Unit }
+    }
+
     suspend fun forgetMetadataSnapshots(
         repoPath: String,
         password: String,

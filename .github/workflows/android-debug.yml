@@ -7,6 +7,9 @@ on:
       - master
   pull_request:
 
+permissions:
+  contents: write
+
 concurrency:
   group: android-debug-${{ github.ref }}
   cancel-in-progress: true
@@ -73,4 +76,30 @@ jobs:
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           # APKs are already ZIP archives; re-compressing wastes CPU for ~0 gain.
+          # NOTE: GitHub always wraps artifacts in a .zip — this is unavoidable.
+          # For a raw .apk download, use the rolling release published below.
           compression-level: 0
+
+      - name: Stage APK with a clear filename
+        run: |
+          set -euo pipefail
+          mkdir -p release-out
+          cp app/build/outputs/apk/debug/app-debug.apk release-out/restoid-arm64-debug.apk
+
+      # Release assets are real files (no zip wrapper), so this is a raw .apk
+      # you can download and install directly. The fixed `debug` tag is
+      # overwritten on every push, so the link always points to the latest build.
+      - name: Publish raw APK to rolling debug release
+        if: github.event_name == 'push'
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: debug
+          name: Debug build (arm64-v8a)
+          body: |
+            Continuous arm64-v8a debug build, rebuilt on every push to `master`.
+
+            Commit: ${{ github.sha }}
+            Branch: ${{ github.ref_name }}
+          prerelease: true
+          make_latest: "false"
+          files: release-out/restoid-arm64-debug.apk

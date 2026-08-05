@@ -1,5 +1,14 @@
 import java.io.File
 
+// ABIs to build for. Defaults to all supported ABIs; restrict with
+// `-PenabledAbis=arm64-v8a` (comma-separated) e.g. for faster debug CI.
+// Keep in sync with scripts/build_restic.sh (RESTIC_ABIS).
+val enabledAbis = (providers.gradleProperty("enabledAbis").orNull
+    ?: "arm64-v8a,x86_64")
+    .split(",")
+    .map { it.trim() }
+    .filter { it.isNotEmpty() }
+
 // This task builds the restic binary from the submodule for each required Android architecture.
 tasks.register<Exec>("buildBundledRestic") {
     group = "restic"
@@ -9,8 +18,7 @@ tasks.register<Exec>("buildBundledRestic") {
     outputs.dir(file("src/main/jniLibs"))
 
     onlyIf("binaries not yet built") {
-        !file("src/main/jniLibs/arm64-v8a/librestic.so").exists() ||
-                !file("src/main/jniLibs/x86_64/librestic.so").exists()
+        enabledAbis.any { !file("src/main/jniLibs/$it/librestic.so").exists() }
     }
 
     workingDir = rootProject.projectDir
@@ -61,16 +69,18 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {
-            abiFilters.add("arm64-v8a")
-            abiFilters.add("x86_64")
+            abiFilters.addAll(enabledAbis)
         }
     }
 
     splits {
         abi {
-            isEnable = true
+            // Only split per-ABI when more than one ABI is enabled. With a single
+            // ABI there is nothing to split, so Gradle emits exactly one APK
+            // (e.g. app-debug.apk) instead of per-ABI + universal variants.
+            isEnable = enabledAbis.size > 1
             reset()
-            include("x86_64", "arm64-v8a")
+            include(*enabledAbis.toTypedArray())
             isUniversalApk = true
         }
     }

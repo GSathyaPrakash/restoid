@@ -72,7 +72,28 @@ declare -A ABI_TO_CC=(
     ["x86_64"]="$TOOLCHAIN/bin/x86_64-linux-android${API}-clang"
 )
 
-for abi in "${!ABI_TO_GOARCH[@]}"; do
+# Select which ABIs to build. Override with RESTIC_ABIS (space-separated),
+# e.g. RESTIC_ABIS="arm64-v8a" to build only for arm64. Keep in sync with the
+# enabledAbis Gradle property in app/build.gradle.kts.
+ALL_ABIS=("arm64-v8a" "x86_64")
+if [ -n "${RESTIC_ABIS:-}" ]; then
+    ABIS=()
+    for a in $RESTIC_ABIS; do
+        if [[ " ${ALL_ABIS[*]} " == *" $a "* ]]; then
+            ABIS+=("$a")
+        else
+            echo "Warning: ignoring unknown ABI '$a' (allowed: ${ALL_ABIS[*]})"
+        fi
+    done
+    if [ ${#ABIS[@]} -eq 0 ]; then
+        echo "Error: RESTIC_ABIS set but contains no valid ABIs (allowed: ${ALL_ABIS[*]})"
+        exit 1
+    fi
+else
+    ABIS=("${ALL_ABIS[@]}")
+fi
+
+for abi in "${ABIS[@]}"; do
     goarch="${ABI_TO_GOARCH[$abi]}"
     cc="${ABI_TO_CC[$abi]}"
     out_dir="$OUTPUT_BASE/$abi"

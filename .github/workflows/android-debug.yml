@@ -51,7 +51,9 @@ jobs:
           set -euo pipefail
           "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/clang" --version
 
-      - name: Build restic binaries
+      - name: Build restic binary (arm64-v8a)
+        env:
+          RESTIC_ABIS: arm64-v8a
         run: |
           set -euo pipefail
           ./scripts/build_restic.sh
@@ -59,13 +61,16 @@ jobs:
       - name: Set up Gradle cache
         uses: gradle/actions/setup-gradle@v6
 
-      - name: Build debug APKs
+      - name: Build arm64-v8a debug APK
         run: |
           set -euo pipefail
-          ./gradlew --no-daemon clean assembleDebug
+          ./gradlew --no-daemon clean assembleDebug -PenabledAbis=arm64-v8a
 
-      - name: Upload debug APKs
+      - name: Upload arm64-v8a debug APK
         uses: actions/upload-artifact@v7
         with:
-          name: restoid-debug-apks
+          name: restoid-arm64-debug
           path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          # APKs are already ZIP archives; re-compressing wastes CPU for ~0 gain.
+          compression-level: 0

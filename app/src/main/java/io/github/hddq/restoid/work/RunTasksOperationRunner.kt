@@ -118,19 +118,29 @@ class RunTasksOperationRunner(
                     perAppMode = request.perAppMode
                 )
 
-                val runner = if (request.perAppMode) perAppBackupRunner else backupRunner
-                val result = runner.run(
-                    request = backupRequest,
-                    onProgress = { childProgress ->
-                        progressState = mapChildProgress(childProgress, backupStageCount)
-                        onProgress(progressState)
-                    },
-                    shouldStop = shouldStop,
-                    stageContext = OperationStageContext(
-                        completedStagesBefore = completedTaskUnits,
-                        totalStages = totalEnabledTasks
-                    )
+                val onBackupProgress: (OperationProgress) -> Unit = { childProgress ->
+                    progressState = mapChildProgress(childProgress, backupStageCount)
+                    onProgress(progressState)
+                }
+                val backupStageContext = OperationStageContext(
+                    completedStagesBefore = completedTaskUnits,
+                    totalStages = totalEnabledTasks
                 )
+                val result = if (request.perAppMode) {
+                    perAppBackupRunner.run(
+                        request = backupRequest,
+                        onProgress = onBackupProgress,
+                        shouldStop = shouldStop,
+                        stageContext = backupStageContext
+                    )
+                } else {
+                    backupRunner.run(
+                        request = backupRequest,
+                        onProgress = onBackupProgress,
+                        shouldStop = shouldStop,
+                        stageContext = backupStageContext
+                    )
+                }
 
                 completedTaskUnits += backupStageCount
                 summaries += context.getString(
